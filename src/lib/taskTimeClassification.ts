@@ -23,6 +23,7 @@ export function classifyTaskTime(task: Task): TaskTimeType {
   return TaskTimeType.TIMED;
 }
 
+// 固定排序：全天 → 無時間（依優先級、建立時間）→ 定時（依開始時間），跨月/週/日視圖與側邊面板共用同一順序。
 export function sortDayTasks(tasks: Task[]): Task[] {
   const allDayTasks = tasks.filter((t) => classifyTaskTime(t) === TaskTimeType.ALL_DAY);
   const noTimeTasks = tasks.filter((t) => classifyTaskTime(t) === TaskTimeType.NO_TIME);

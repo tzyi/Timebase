@@ -66,6 +66,7 @@ export function calculateTaskLayout(
   return layouts;
 }
 
+// 以掃描線 (sweep line) 方式切割時間軸：每當有任務開始/結束，就切出一個「同時活躍任務」不變的區間。
 function buildIntervals(tasks: TimedTask[]): LayoutInterval[] {
   const events: { time: number; type: 'start' | 'end'; taskId: number }[] = [];
 
@@ -103,6 +104,7 @@ function buildIntervals(tasks: TimedTask[]): LayoutInterval[] {
   return intervals;
 }
 
+// 依序走過各區間，為每個任務指派最小的未使用欄位編號；同一任務在整段生命週期中欄位固定不變。
 function assignColumns(intervals: LayoutInterval[]): Map<number, number> {
   const columnMap = new Map<number, number>();
 
@@ -126,6 +128,7 @@ function assignColumns(intervals: LayoutInterval[]): Map<number, number> {
   return columnMap;
 }
 
+// 任務的實際寬度需依「與它重疊的所有任務中，同時活躍數最多的區間」決定，而非只看自己所在的單一區間。
 function getMaxColumnsInRange(
   intervals: LayoutInterval[],
   start: number,

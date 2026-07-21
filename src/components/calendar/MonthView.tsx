@@ -72,7 +72,7 @@ export default function MonthView({
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDateDragEnter = (e: React.DragEvent, dateStr: string) => {
+  const handleDateDragEnter = (_e: React.DragEvent, dateStr: string) => {
     if (draggedTaskId !== null) {
       setDraggedOverDate(dateStr)
     }
@@ -168,7 +168,7 @@ export default function MonthView({
                             {visibleTasks.map((task) => {
                               const bgColor = getTaskBackgroundColor(task)
                               const textColor = getTaskTextColor(task)
-                              const isCompleted = task.status === 'done' || task.completedAt
+                              const isCompleted = task.status === 'done' || !!task.completedAt
                               return (
                                 <button
                                   key={task.id}
@@ -209,7 +209,7 @@ export default function MonthView({
                             {dayTasks.map((task) => {
                               const bgColor = getTaskBackgroundColor(task)
                               const textColor = getTaskTextColor(task)
-                              const isCompleted = task.status === 'done' || task.completedAt
+                              const isCompleted = task.status === 'done' || !!task.completedAt
                               return (
                                 <button
                                   key={task.id}

@@ -46,7 +46,7 @@ Prisma schema 定義了以下核心實體：
 - **User**：用戶帳戶，與 lists、tags、tasks 相關聯
 - **ListFolder**：清單資料夾，用戶擁有，可包含多個 lists
 - **List**：清單，屬於用戶和資料夾（可選），包含 tasks
-- **Task**：任務，屬於用戶和清單（可選），具有優先級、截止日期、狀態、標籤等
+- **Task**：任務，屬於用戶和清單（可選），具有優先級、截止日期、狀態、標籤等，另包含 `dueTime`、`endTime`（HH:MM 字串）與 `allDay`（布林）以支援日曆時間管理
 - **Tag**：標籤，屬於用戶
 - **TaskTag**：任務和標籤之間的多對多關聯
 
@@ -63,6 +63,19 @@ Prisma schema 定義了以下核心實體：
 - **密碼驗證**：bcrypt
 - **Session 會話**：JWT，自訂 callback 注入 `user.id`
 - **認證頁面**：`/login`
+
+### 日曆系統（`/calendar`）
+
+與 `/tasks` 並存的第二個任務視圖，提供月／週／日三層日曆，狀態管理集中在 `CalendarPage`（單頁 + 內部 Tab 切換，不使用 URL 路由切換視圖）：
+
+- **`src/components/calendar/CalendarPage.tsx`**：頂層狀態容器，持有 `view`（month/week/day）、`focusDate`、`filters`、`selectedTaskId`，並依目前 `view` 呼叫對應的 Server Action 重新抓取資料
+- **`MonthView` / `WeekView` / `DayView`**：三個視圖元件，共用 `focusDate`、`filters` 狀態，切換視圖不會重設焦點日期或過濾條件
+- **`LeftPanel` / `DayTasksList`**：左側常駐面板，永遠顯示「焦點日期」的任務（依全天 → 無時間 → 定時排序）
+- **`TaskDetailModal`**：置中彈出視窗，快速編輯任務（含時間欄位），保存後透過 `refreshCurrentView()` 重新整理當前視圖與側邊面板
+- **`src/lib/calendarHelpers.ts`**：日期運算與任務底色（依清單顏色 / 已完成 / 過期）共用函數
+- **`src/lib/taskTimeClassification.ts`**：將任務分類為 `ALL_DAY / NO_TIME / TIMED`，供排序與分區顯示使用
+- **`src/lib/taskLayout.ts`**：週／日視圖時間軸的重疊任務排版演算法（欄位指派 + top/height/left/width 計算）
+- **`src/actions/tasks.ts`**：`getMonthTasks()` / `getWeekTasks()` / `getDayTasks()` 依 `userId` + 日期範圍 + 過濾條件（清單／標籤／優先級）查詢並回傳
 
 ---
 
@@ -120,7 +133,9 @@ npx prisma generate
 | `src/auth.ts` | NextAuth 配置和認證邏輯 |
 | `src/lib/prisma.ts` | Prisma Client 單例實例 |
 | `src/app/` | Next.js App Router 頁面和布局 |
-| `src/actions/` | Server Actions（目前為空，預留） |
+| `src/actions/` | Server Actions（tasks、lists、tags、auth 等資料存取邏輯） |
+| `src/components/calendar/` | 日曆系統元件（CalendarPage、MonthView、WeekView、DayView、TaskDetailModal 等） |
+| `src/lib/calendarHelpers.ts`、`taskTimeClassification.ts`、`taskLayout.ts` | 日曆日期運算、任務時間分類、時間軸重疊排版共用函數 |
 | `openspec/` | OpenSpec 規範管理（specs、changes） |
 | `docs/` | 專案文檔和筆記 |
 

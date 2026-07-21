@@ -2,10 +2,18 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { List, Tag } from '@prisma/client'
-import { getMonthTasks, updateTask, CalendarFilters as ServerCalendarFilters } from '@/actions/tasks'
-import { getToday, dateToString } from '@/lib/calendarHelpers'
+import {
+  getMonthTasks,
+  getWeekTasks,
+  getDayTasks,
+  updateTask,
+  CalendarFilters as ServerCalendarFilters,
+} from '@/actions/tasks'
+import { getToday, dateToString, getWeekDays, addDays, formatDate } from '@/lib/calendarHelpers'
 import FilterBar from './FilterBar'
 import MonthView from './MonthView'
+import WeekView from './WeekView'
+import DayView from './DayView'
 import DayTasksList from './DayTasksList'
 import TaskDetailModal from './TaskDetailModal'
 import { CalendarView, CalendarFiltersState, TaskWithRelations } from './types'
@@ -36,31 +44,69 @@ export default function CalendarPage({
   })
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
   const [monthTasks, setMonthTasks] = useState(initialMonthTasks)
+  const [weekTasks, setWeekTasks] = useState<{ [date: string]: TaskWithRelations[] }>({})
+  const [dayTasks, setDayTasks] = useState<TaskWithRelations[]>([])
   const [isLoading, setIsLoading] = useState(false)
+
+  const buildApiFilters = useCallback((currentFilters: CalendarFiltersState): ServerCalendarFilters => ({
+    listIds: currentFilters.listIds.length > 0 ? currentFilters.listIds : undefined,
+    tagIds: currentFilters.tagIds.length > 0 ? currentFilters.tagIds : undefined,
+    priorities: currentFilters.priorities.length > 0 ? currentFilters.priorities : undefined,
+  }), [])
 
   const refreshMonthTasks = useCallback(async (date: Date, currentFilters: CalendarFiltersState) => {
     setIsLoading(true)
     try {
-      const apiFilters: ServerCalendarFilters = {
-        listIds: currentFilters.listIds.length > 0 ? currentFilters.listIds : undefined,
-        tagIds: currentFilters.tagIds.length > 0 ? currentFilters.tagIds : undefined,
-        priorities: currentFilters.priorities.length > 0 ? currentFilters.priorities : undefined,
-      }
-      const result = await getMonthTasks(date.getFullYear(), date.getMonth(), apiFilters)
+      const result = await getMonthTasks(date.getFullYear(), date.getMonth(), buildApiFilters(currentFilters))
       if (result.success && result.data) {
         setMonthTasks(result.data as { [date: string]: TaskWithRelations[] })
       }
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [buildApiFilters])
+
+  const refreshWeekTasks = useCallback(async (date: Date, currentFilters: CalendarFiltersState) => {
+    setIsLoading(true)
+    try {
+      const weekStart = getWeekDays(date)[0]
+      const result = await getWeekTasks(weekStart, buildApiFilters(currentFilters))
+      if (result.success && result.data) {
+        setWeekTasks(result.data as { [date: string]: TaskWithRelations[] })
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [buildApiFilters])
+
+  const refreshDayTasks = useCallback(async (date: Date, currentFilters: CalendarFiltersState) => {
+    setIsLoading(true)
+    try {
+      const result = await getDayTasks(date, buildApiFilters(currentFilters))
+      if (result.success && result.data) {
+        setDayTasks(result.data as TaskWithRelations[])
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [buildApiFilters])
+
+  const refreshCurrentView = useCallback(async (date: Date, currentFilters: CalendarFiltersState) => {
+    if (view === 'month') await refreshMonthTasks(date, currentFilters)
+    if (view === 'week') await refreshWeekTasks(date, currentFilters)
+    if (view === 'day') await refreshDayTasks(date, currentFilters)
+  }, [view, refreshMonthTasks, refreshWeekTasks, refreshDayTasks])
 
   useEffect(() => {
     if (view === 'month') {
       refreshMonthTasks(focusDate, filters)
+    } else if (view === 'week') {
+      refreshWeekTasks(focusDate, filters)
+    } else if (view === 'day') {
+      refreshDayTasks(focusDate, filters)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, focusDate.getFullYear(), focusDate.getMonth(), filters, refreshMonthTasks])
+  }, [view, focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate(), filters])
 
   const handleDateClick = useCallback((date: Date) => {
     setFocusDate(date)
@@ -85,15 +131,58 @@ export default function CalendarPage({
     setFocusDate(newDate)
   }, [])
 
+  const handlePrevWeek = useCallback(() => {
+    setFocusDate((prev) => addDays(getWeekDays(prev)[0], -7))
+  }, [])
+
+  const handleNextWeek = useCallback(() => {
+    setFocusDate((prev) => addDays(getWeekDays(prev)[0], 7))
+  }, [])
+
+  const handlePrevDay = useCallback(() => {
+    setFocusDate((prev) => addDays(prev, -1))
+  }, [])
+
+  const handleNextDay = useCallback(() => {
+    setFocusDate((prev) => addDays(prev, 1))
+  }, [])
+
+  const handleToday = useCallback(() => {
+    setFocusDate(getToday())
+  }, [])
+
   const handleModalClose = useCallback(() => {
     setSelectedTaskId(null)
   }, [])
 
+  const weekStart = getWeekDays(focusDate)[0]
+  const weekEnd = addDays(weekStart, 6)
   const monthLabel = `${focusDate.getFullYear()} 年 ${focusDate.getMonth() + 1} 月`
-  const focusDateTasks = monthTasks[dateToString(focusDate)] || []
+  const weekLabel = `${formatDate(weekStart)} - ${formatDate(weekEnd)}`
+  const headerLabel = view === 'month' ? monthLabel : view === 'week' ? weekLabel : formatDate(focusDate)
+  const focusDateTasks =
+    view === 'day'
+      ? dayTasks
+      : view === 'week'
+        ? weekTasks[dateToString(focusDate)] || []
+        : monthTasks[dateToString(focusDate)] || []
+  // 目前視圖的資料在每次切換/儲存後都會重新抓取，其餘視圖的資料可能是尚未刷新的舊資料，
+  // 因此查找時需優先採用目前視圖的資料，避免顯示到過期的任務內容（例如舊的時間欄位）。
+  const currentViewTasks =
+    view === 'day'
+      ? dayTasks
+      : view === 'week'
+        ? Object.values(weekTasks).flat()
+        : Object.values(monthTasks).flat()
+  const otherLoadedTasks = [
+    ...(view !== 'month' ? Object.values(monthTasks).flat() : []),
+    ...(view !== 'week' ? Object.values(weekTasks).flat() : []),
+    ...(view !== 'day' ? dayTasks : []),
+  ]
+  const allLoadedTasks = [...currentViewTasks, ...otherLoadedTasks]
   const selectedTask =
     selectedTaskId !== null
-      ? Object.values(monthTasks).flat().find((t) => t.id === selectedTaskId) || null
+      ? allLoadedTasks.find((t) => t.id === selectedTaskId) || null
       : null
 
   return (
@@ -104,7 +193,29 @@ export default function CalendarPage({
 
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
-          <h1 className="text-lg font-semibold text-gray-900">{monthLabel}</h1>
+          <div className="flex items-center gap-2">
+            {view === 'week' && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handlePrevWeek}
+                  aria-label="上一週"
+                  className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextWeek}
+                  aria-label="下一週"
+                  className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+            <h1 className="text-lg font-semibold text-gray-900">{headerLabel}</h1>
+          </div>
 
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
             {VIEW_LABELS.map(({ value, label }) => (
@@ -140,14 +251,23 @@ export default function CalendarPage({
             />
           )}
           {view === 'week' && (
-            <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-              週視圖開發中
-            </div>
+            <WeekView
+              weekTasks={weekTasks}
+              weekStart={weekStart}
+              focusDate={focusDate}
+              onDateClick={handleDateClick}
+              onTaskClick={handleTaskClick}
+            />
           )}
           {view === 'day' && (
-            <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-              日視圖開發中
-            </div>
+            <DayView
+              dayTasks={dayTasks}
+              focusDate={focusDate}
+              onTaskClick={handleTaskClick}
+              onPrevDay={handlePrevDay}
+              onNextDay={handleNextDay}
+              onToday={handleToday}
+            />
           )}
           {isLoading && <p className="text-xs text-gray-400 mt-2">載入中...</p>}
         </div>
@@ -157,7 +277,7 @@ export default function CalendarPage({
         task={selectedTask}
         isOpen={selectedTaskId !== null}
         onClose={handleModalClose}
-        onSave={() => refreshMonthTasks(focusDate, filters)}
+        onSave={() => refreshCurrentView(focusDate, filters)}
         lists={initialLists}
         tags={initialTags}
       />
