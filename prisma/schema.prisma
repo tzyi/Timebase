@@ -14,7 +14,6 @@ model User {
   name          String?
 
   lists         List[]
-  listFolders   ListFolder[]
   tags          Tag[]
   tasks         Task[]
 
@@ -22,27 +21,10 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model ListFolder {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  sortOrder Int     @default(0)
-
-  lists List[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
-
 model List {
   id        Int     @id @default(autoincrement())
   userId    Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folderId  Int?
-  folder    ListFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   name      String
   color     String  @default("gray")
   sortOrder Int     @default(0)
@@ -53,7 +35,6 @@ model List {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([folderId])
 }
 
 model Task {

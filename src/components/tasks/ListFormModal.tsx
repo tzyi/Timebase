@@ -1,18 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { createList, createFolder } from '@/actions/lists'
+import { createList } from '@/actions/lists'
 
 interface ListFormModalProps {
   isOpen: boolean
-  mode: 'list' | 'folder'
   onClose: () => void
   onSuccess: () => void
 }
 
 const colors = ['gray', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'purple', 'pink']
 
-export default function ListFormModal({ isOpen, mode, onClose, onSuccess }: ListFormModalProps) {
+export default function ListFormModal({ isOpen, onClose, onSuccess }: ListFormModalProps) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('blue')
   const [isLoading, setIsLoading] = useState(false)
@@ -22,21 +21,12 @@ export default function ListFormModal({ isOpen, mode, onClose, onSuccess }: List
     setIsLoading(true)
 
     try {
-      if (mode === 'list') {
-        const result = await createList(name, color)
-        if (result.success) {
-          setName('')
-          setColor('blue')
-          onClose()
-          onSuccess()
-        }
-      } else {
-        const result = await createFolder(name)
-        if (result.success) {
-          setName('')
-          onClose()
-          onSuccess()
-        }
+      const result = await createList(name, color)
+      if (result.success) {
+        setName('')
+        setColor('blue')
+        onClose()
+        onSuccess()
       }
     } finally {
       setIsLoading(false)
@@ -48,60 +38,54 @@ export default function ListFormModal({ isOpen, mode, onClose, onSuccess }: List
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {mode === 'list' ? '新增清單' : '新增資料夾'}
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">新增清單</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {mode === 'list' ? '清單名稱' : '資料夾名稱'}
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">清單名稱</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={mode === 'list' ? '例如：工作' : '例如：個人'}
+              placeholder="例如：工作"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
               required
             />
           </div>
 
-          {mode === 'list' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">顏色</label>
-              <div className="grid grid-cols-7 gap-2">
-                {colors.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      color === c ? 'border-gray-400 ring-2 ring-offset-2 ring-blue-500' : 'border-gray-200'
-                    }`}
-                    style={{
-                      backgroundColor:
-                        c === 'gray' ? '#d1d5db' :
-                        c === 'red' ? '#ef4444' :
-                        c === 'orange' ? '#f97316' :
-                        c === 'amber' ? '#fbbf24' :
-                        c === 'yellow' ? '#facc15' :
-                        c === 'lime' ? '#84cc16' :
-                        c === 'green' ? '#22c55e' :
-                        c === 'teal' ? '#14b8a6' :
-                        c === 'cyan' ? '#06b6d4' :
-                        c === 'blue' ? '#3b82f6' :
-                        c === 'indigo' ? '#6366f1' :
-                        c === 'purple' ? '#a855f7' :
-                        c === 'pink' ? '#ec4899' :
-                        '#d1d5db',
-                    }}
-                  />
-                ))}
-              </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">顏色</label>
+            <div className="grid grid-cols-7 gap-2">
+              {colors.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    color === c ? 'border-gray-400 ring-2 ring-offset-2 ring-blue-500' : 'border-gray-200'
+                  }`}
+                  style={{
+                    backgroundColor:
+                      c === 'gray' ? '#d1d5db' :
+                      c === 'red' ? '#ef4444' :
+                      c === 'orange' ? '#f97316' :
+                      c === 'amber' ? '#fbbf24' :
+                      c === 'yellow' ? '#facc15' :
+                      c === 'lime' ? '#84cc16' :
+                      c === 'green' ? '#22c55e' :
+                      c === 'teal' ? '#14b8a6' :
+                      c === 'cyan' ? '#06b6d4' :
+                      c === 'blue' ? '#3b82f6' :
+                      c === 'indigo' ? '#6366f1' :
+                      c === 'purple' ? '#a855f7' :
+                      c === 'pink' ? '#ec4899' :
+                      '#d1d5db',
+                  }}
+                />
+              ))}
             </div>
-          )}
+          </div>
 
           <div className="flex gap-3">
             <button

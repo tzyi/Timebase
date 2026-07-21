@@ -1,6 +1,6 @@
 'use client'
 
-import { List, ListFolder, Tag } from '@prisma/client'
+import { List, Tag } from '@prisma/client'
 import { useState } from 'react'
 import ListFormModal from './ListFormModal'
 import TagFormModal from './TagFormModal'
@@ -9,9 +9,6 @@ type ViewKind = 'today' | 'next7days' | 'inbox' | 'completed'
 
 interface SidebarProps {
   lists: (List & { uncompletedCount?: number })[]
-  folders: (ListFolder & {
-    lists: Array<List & { uncompletedCount?: number }>
-  })[]
   tags: (Tag & { taskCount?: number })[]
   selectedView: ViewKind | { kind: 'list'; listId: number } | { kind: 'tag'; tagId: number }
   onSelectView: (view: any) => void
@@ -20,26 +17,13 @@ interface SidebarProps {
 
 export default function Sidebar({
   lists,
-  folders,
   tags,
   selectedView,
   onSelectView,
   onRefresh,
 }: SidebarProps) {
-  const [expandedFolders, setExpandedFolders] = useState<Set<number>>(new Set())
   const [isListModalOpen, setIsListModalOpen] = useState(false)
-  const [listModalMode, setListModalMode] = useState<'list' | 'folder'>('list')
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
-
-  const toggleFolder = (folderId: number) => {
-    const newExpanded = new Set(expandedFolders)
-    if (newExpanded.has(folderId)) {
-      newExpanded.delete(folderId)
-    } else {
-      newExpanded.add(folderId)
-    }
-    setExpandedFolders(newExpanded)
-  }
 
   const isViewSelected = (view: any) => {
     if (typeof selectedView === 'string') {
@@ -54,11 +38,6 @@ export default function Sidebar({
       ('listId' in selectedView && selectedView.listId === view.listId)
     )
   }
-
-  const unfolderListIds = new Set(
-    folders.flatMap((f) => f.lists.map((l) => l.id))
-  )
-  const unfolderLists = lists.filter((l) => !unfolderListIds.has(l.id))
 
   return (
     <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col overflow-y-auto">
@@ -87,48 +66,11 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* 清單與資料夾 */}
+      {/* 清單 */}
       <div className="p-4 border-b border-gray-200 flex-1">
         <h3 className="text-xs font-semibold text-gray-700 uppercase mb-3">我的清單</h3>
 
-        {folders.map((folder) => (
-          <div key={folder.id} className="mb-3">
-            <button
-              onClick={() => toggleFolder(folder.id)}
-              className="w-full flex items-center gap-2 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-            >
-              <span className={`transition-transform ${expandedFolders.has(folder.id) ? '' : '-rotate-90'}`}>
-                ▼
-              </span>
-              <span className="flex-1">{folder.name}</span>
-            </button>
-
-            {expandedFolders.has(folder.id) && (
-              <div className="ml-4 space-y-1 mt-1">
-                {folder.lists.map((list) => (
-                  <button
-                    key={list.id}
-                    onClick={() => onSelectView({ kind: 'list', listId: list.id })}
-                    className={`w-full text-left flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors ${
-                      isViewSelected({ kind: 'list', listId: list.id })
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: getColorValue(list.color) }}
-                    />
-                    <span className="flex-1">{list.name}</span>
-                    <span className="text-xs text-gray-500">{list.uncompletedCount || 0}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-
-        {unfolderLists.map((list) => (
+        {lists.map((list) => (
           <button
             key={list.id}
             onClick={() => onSelectView({ kind: 'list', listId: list.id })}
@@ -148,23 +90,10 @@ export default function Sidebar({
         ))}
 
         <button
-          onClick={() => {
-            setListModalMode('list')
-            setIsListModalOpen(true)
-          }}
+          onClick={() => setIsListModalOpen(true)}
           className="w-full text-left px-2 py-1 mt-2 text-sm text-blue-500 hover:text-blue-600 font-medium"
         >
           + 新增清單
-        </button>
-
-        <button
-          onClick={() => {
-            setListModalMode('folder')
-            setIsListModalOpen(true)
-          }}
-          className="w-full text-left px-2 py-1 text-sm text-blue-500 hover:text-blue-600 font-medium"
-        >
-          + 新增資料夾
         </button>
       </div>
 
@@ -202,7 +131,6 @@ export default function Sidebar({
 
       <ListFormModal
         isOpen={isListModalOpen}
-        mode={listModalMode}
         onClose={() => setIsListModalOpen(false)}
         onSuccess={onRefresh}
       />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { List, ListFolder, Tag, Task } from '@prisma/client'
+import { List, Tag, Task } from '@prisma/client'
 import Sidebar from './Sidebar'
 import TaskListView from './TaskListView'
 import TaskDetailPanel from './TaskDetailPanel'
@@ -12,7 +12,7 @@ import {
   postponeTask,
   createTask,
 } from '@/actions/tasks'
-import { getLists, getFolders } from '@/actions/lists'
+import { getLists } from '@/actions/lists'
 
 type TaskWithRelations = Task & {
   list: List | null
@@ -21,15 +21,10 @@ type TaskWithRelations = Task & {
 
 type ListWithCount = List & { uncompletedCount?: number }
 
-type FolderWithLists = ListFolder & {
-  lists: ListWithCount[]
-}
-
 type TagWithCount = Tag & { taskCount?: number }
 
 interface TasksAppProps {
   initialLists: ListWithCount[]
-  initialFolders: FolderWithLists[]
   initialTags: TagWithCount[]
   initialView: 'today' | 'next7days' | 'inbox' | 'completed'
   initialTasks: TaskWithRelations[]
@@ -46,14 +41,12 @@ type ViewState =
 
 export default function TasksApp({
   initialLists,
-  initialFolders,
   initialTags,
   initialView,
   initialTasks,
   initialOverdueTasks = [],
 }: TasksAppProps) {
   const [lists, setLists] = useState<ListWithCount[]>(initialLists)
-  const [folders, setFolders] = useState<FolderWithLists[]>(initialFolders)
   const [tags] = useState<TagWithCount[]>(initialTags)
   const [selectedView, setSelectedView] = useState<ViewState>(initialView)
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
@@ -88,11 +81,6 @@ export default function TasksApp({
       const listsResult = await getLists()
       if (listsResult.success && listsResult.data) {
         setLists(listsResult.data)
-      }
-
-      const foldersResult = await getFolders()
-      if (foldersResult.success && foldersResult.data) {
-        setFolders(foldersResult.data)
       }
     } finally {
       setIsLoadingTasks(false)
@@ -170,7 +158,6 @@ export default function TasksApp({
     <div className="flex h-screen bg-gray-100">
       <Sidebar
         lists={lists}
-        folders={folders}
         tags={tags}
         selectedView={selectedView}
         onSelectView={handleSelectView}
@@ -184,7 +171,7 @@ export default function TasksApp({
               type="text"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              placeholder="新增任務..."
+              placeholder="新增任務到收集箱..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
