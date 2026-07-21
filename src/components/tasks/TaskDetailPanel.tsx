@@ -302,7 +302,7 @@ export default function TaskDetailPanel({
               : '到期日'}
           </button>
           {showDatePicker && (
-            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-3 w-56">
+            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-3 w-72">
               <input
                 ref={dateInputRef}
                 type="date"
@@ -325,24 +325,24 @@ export default function TaskDetailPanel({
                   </label>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="block text-xs text-gray-500 mb-0.5">開始時間</label>
                       <input
                         type="time"
                         value={dueTime}
                         onChange={(e) => handleDueTimeChange(e.target.value)}
                         disabled={allDay}
-                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full text-sm border border-gray-300 rounded px-1.5 py-1 disabled:bg-gray-50 disabled:text-gray-400"
                       />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="block text-xs text-gray-500 mb-0.5">結束時間</label>
                       <input
                         type="time"
                         value={endTime}
                         onChange={(e) => handleEndTimeChange(e.target.value)}
                         disabled={allDay}
-                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full text-sm border border-gray-300 rounded px-1.5 py-1 disabled:bg-gray-50 disabled:text-gray-400"
                       />
                     </div>
                   </div>
