@@ -7,6 +7,7 @@ import {
   getWeekTasks,
   getDayTasks,
   updateTask,
+  toggleTaskComplete,
   CalendarFilters as ServerCalendarFilters,
 } from '@/actions/tasks'
 import { getToday, dateToString, getWeekDays, addDays, formatDate } from '@/lib/calendarHelpers'
@@ -131,6 +132,13 @@ export default function CalendarPage({
     setSelectedTaskId(taskId)
   }, [])
 
+  const handleToggleComplete = useCallback(async (taskId: number, completed: boolean) => {
+    const result = await toggleTaskComplete(taskId, completed)
+    if (result.success) {
+      await refreshCurrentView(focusDate, filters)
+    }
+  }, [focusDate, filters, refreshCurrentView])
+
   const handleTaskUpdate = useCallback(async (taskId: number, newDateStr: string) => {
     const newDate = new Date(`${newDateStr}T00:00:00`)
     const result = await updateTask(taskId, { dueDate: newDate })
@@ -223,7 +231,12 @@ export default function CalendarPage({
   return (
     <div className="flex h-full bg-gray-100">
       <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white">
-        <DayTasksList focusDate={focusDate} tasks={focusDateTasks} onTaskClick={handleTaskClick} />
+        <DayTasksList
+          focusDate={focusDate}
+          tasks={focusDateTasks}
+          onTaskClick={handleTaskClick}
+          onToggleComplete={handleToggleComplete}
+        />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col">

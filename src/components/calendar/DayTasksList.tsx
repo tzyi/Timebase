@@ -8,9 +8,10 @@ interface DayTasksListProps {
   focusDate: Date
   tasks: TaskWithRelations[]
   onTaskClick: (taskId: number) => void
+  onToggleComplete: (taskId: number, completed: boolean) => void
 }
 
-export default function DayTasksList({ focusDate, tasks, onTaskClick }: DayTasksListProps) {
+export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleComplete }: DayTasksListProps) {
   const sortedTasks = tasks.sort((a, b) => {
     const aType = classifyTaskTime(a as any)
     const bType = classifyTaskTime(b as any)
@@ -54,19 +55,29 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick }: DayTasks
               {allDayTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
                 const textColor = getTaskTextColor(task)
-                const isCompleted = task.status === 'done' || task.completedAt
+                const isCompleted = task.status === 'done' || !!task.completedAt
                 return (
-                  <button
+                  <div
                     key={task.id}
-                    type="button"
-                    onClick={() => onTaskClick(task.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
                       isCompleted ? 'line-through opacity-70' : ''
                     }`}
                   >
-                    {isCompleted && <span className="shrink-0">✓</span>}
-                    <span className="truncate">{task.title}</span>
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={isCompleted}
+                      onChange={(e) => onToggleComplete(task.id, e.target.checked)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 w-4 h-4 rounded cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onTaskClick(task.id)}
+                      className="flex-1 min-w-0 text-left truncate"
+                    >
+                      {task.title}
+                    </button>
+                  </div>
                 )
               })}
             </div>
@@ -80,20 +91,30 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick }: DayTasks
               {noTimeTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
                 const textColor = getTaskTextColor(task)
-                const isCompleted = task.status === 'done' || task.completedAt
+                const isCompleted = task.status === 'done' || !!task.completedAt
                 return (
-                  <button
+                  <div
                     key={task.id}
-                    type="button"
-                    onClick={() => onTaskClick(task.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
                       isCompleted ? 'line-through opacity-70' : ''
                     }`}
                   >
-                    {isCompleted && <span className="shrink-0">✓</span>}
-                    {task.priority === 'high' && <span className="shrink-0 text-red-500">🚩</span>}
-                    <span className="truncate">{task.title}</span>
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={isCompleted}
+                      onChange={(e) => onToggleComplete(task.id, e.target.checked)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 w-4 h-4 rounded cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onTaskClick(task.id)}
+                      className="flex-1 min-w-0 flex items-center gap-2 text-left"
+                    >
+                      {task.priority === 'high' && <span className="shrink-0 text-red-500">🚩</span>}
+                      <span className="truncate">{task.title}</span>
+                    </button>
+                  </div>
                 )
               })}
             </div>
@@ -107,22 +128,32 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick }: DayTasks
               {timedTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
                 const textColor = getTaskTextColor(task)
-                const isCompleted = task.status === 'done' || task.completedAt
+                const isCompleted = task.status === 'done' || !!task.completedAt
                 const timeDisplay = task.dueTime ? formatTime(task.dueTime) : ''
                 return (
-                  <button
+                  <div
                     key={task.id}
-                    type="button"
-                    onClick={() => onTaskClick(task.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
                       isCompleted ? 'line-through opacity-70' : ''
                     }`}
                   >
-                    {isCompleted && <span className="shrink-0">✓</span>}
-                    {task.priority === 'high' && <span className="shrink-0 text-red-500">🚩</span>}
-                    <span className="text-xs text-gray-500 shrink-0">{timeDisplay}</span>
-                    <span className="truncate">{task.title}</span>
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={isCompleted}
+                      onChange={(e) => onToggleComplete(task.id, e.target.checked)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 w-4 h-4 rounded cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onTaskClick(task.id)}
+                      className="flex-1 min-w-0 flex items-center gap-2 text-left"
+                    >
+                      {task.priority === 'high' && <span className="shrink-0 text-red-500">🚩</span>}
+                      <span className="text-xs text-gray-500 shrink-0">{timeDisplay}</span>
+                      <span className="truncate">{task.title}</span>
+                    </button>
+                  </div>
                 )
               })}
             </div>

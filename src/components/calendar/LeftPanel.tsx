@@ -12,6 +12,7 @@ interface LeftPanelProps {
   filters: CalendarFiltersState
   onFilterChange: (filters: CalendarFiltersState) => void
   onTaskClick: (taskId: number) => void
+  onToggleComplete: (taskId: number, completed: boolean) => void
   lists: List[]
   tags: Tag[]
 }
@@ -22,13 +23,14 @@ export default function LeftPanel({
   filters,
   onFilterChange,
   onTaskClick,
+  onToggleComplete,
   lists,
   tags,
 }: LeftPanelProps) {
   return (
     <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white">
       <FilterBar lists={lists} tags={tags} filters={filters} onFilterChange={onFilterChange} />
-      <DayTasksList focusDate={focusDate} tasks={dayTasks} onTaskClick={onTaskClick} />
+      <DayTasksList focusDate={focusDate} tasks={dayTasks} onTaskClick={onTaskClick} onToggleComplete={onToggleComplete} />
     </div>
   )
 }
