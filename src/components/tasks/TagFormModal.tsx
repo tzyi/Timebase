@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createTag } from '@/actions/tags'
+import { ensureOnline } from '@/lib/toast'
 
 interface TagFormModalProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ export default function TagFormModal({ isOpen, onClose, onSuccess }: TagFormModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!ensureOnline()) return
     setIsLoading(true)
 
     try {

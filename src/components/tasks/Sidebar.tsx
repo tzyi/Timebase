@@ -13,6 +13,7 @@ interface SidebarProps {
   selectedView: ViewKind | { kind: 'list'; listId: number } | { kind: 'tag'; tagId: number }
   onSelectView: (view: any) => void
   onRefresh: () => void
+  className?: string
 }
 
 export default function Sidebar({
@@ -21,6 +22,7 @@ export default function Sidebar({
   selectedView,
   onSelectView,
   onRefresh,
+  className = '',
 }: SidebarProps) {
   const [isListModalOpen, setIsListModalOpen] = useState(false)
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
@@ -40,7 +42,7 @@ export default function Sidebar({
   }
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col overflow-y-auto">
+    <div className={`w-64 bg-gray-50 border-r border-gray-200 flex flex-col overflow-y-auto ${className}`}>
       {/* 智慧清單 */}
       <div className="p-4 border-b border-gray-200">
         <h3 className="text-xs font-semibold text-gray-700 uppercase mb-3">智慧清單</h3>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { List, Tag, Task } from '@prisma/client'
+import { List, Tag, Task, Subtask } from '@prisma/client'
 import Sidebar from './Sidebar'
 import TaskListView from './TaskListView'
 import TaskDetailPanel from './TaskDetailPanel'
@@ -13,11 +13,12 @@ import {
   createTask,
 } from '@/actions/tasks'
 import { getLists } from '@/actions/lists'
+import { ensureOnline } from '@/lib/toast'
 
 type TaskWithRelations = Task & {
   list: List | null
   tags: Array<{ tag: Tag }>
-  subtasks: Task[]
+  subtasks: Subtask[]
 }
 
 type ListWithCount = List & { uncompletedCount?: number }
@@ -55,6 +56,8 @@ export default function TasksApp({
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const refreshTasks = useCallback(async () => {
     setIsLoadingTasks(true)
@@ -91,6 +94,7 @@ export default function TasksApp({
   const handleSelectView = useCallback(async (view: ViewState) => {
     setSelectedView(view)
     setSelectedTaskId(null)
+    setIsDrawerOpen(false)
     setIsLoadingTasks(true)
 
     try {
@@ -120,6 +124,7 @@ export default function TasksApp({
 
   const handleToggleComplete = useCallback(
     async (taskId: number, completed: boolean) => {
+      if (!ensureOnline()) return
       await toggleTaskComplete(taskId, completed)
       await refreshTasks()
     },
@@ -128,6 +133,7 @@ export default function TasksApp({
 
   const handlePostpone = useCallback(
     async (taskId: number) => {
+      if (!ensureOnline()) return
       await postponeTask(taskId)
       await refreshTasks()
     },
@@ -138,6 +144,7 @@ export default function TasksApp({
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!newTaskTitle.trim()) return
+      if (!ensureOnline()) return
 
       let listId: number | null = null
       if (typeof selectedView === 'object' && selectedView.kind === 'list') {
@@ -156,18 +163,63 @@ export default function TasksApp({
   const selectedTask = tasks.find((t) => t.id === selectedTaskId)
 
   return (
-    <div className="flex h-full bg-gray-100">
-      <Sidebar
-        lists={lists}
-        tags={tags}
-        selectedView={selectedView}
-        onSelectView={handleSelectView}
-        onRefresh={refreshTasks}
-      />
+    <div className="flex h-full bg-gray-100 relative">
+      {/* 桌機側欄（可收合） */}
+      {!isSidebarCollapsed && (
+        <Sidebar
+          lists={lists}
+          tags={tags}
+          selectedView={selectedView}
+          onSelectView={handleSelectView}
+          onRefresh={refreshTasks}
+          className="hidden md:flex"
+        />
+      )}
 
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <form onSubmit={handleAddTask} className="flex gap-3">
+      {/* 手機版抽屜側欄 */}
+      {isDrawerOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsDrawerOpen(false)}
+          />
+          <Sidebar
+            lists={lists}
+            tags={tags}
+            selectedView={selectedView}
+            onSelectView={handleSelectView}
+            onRefresh={refreshTasks}
+            className="relative flex w-72 max-w-[80vw] h-full shadow-xl"
+          />
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(true)}
+            className="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700"
+            title="開啟清單側欄"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsSidebarCollapsed((v) => !v)}
+            className="hidden md:block p-2 -ml-2 text-gray-500 hover:text-gray-700"
+            title={isSidebarCollapsed ? '展開側欄' : '收合側欄'}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path strokeLinecap="round" d="M9 4v16" />
+            </svg>
+          </button>
+
+          <form onSubmit={handleAddTask} className="flex-1 flex gap-3">
             <input
               type="text"
               value={newTaskTitle}

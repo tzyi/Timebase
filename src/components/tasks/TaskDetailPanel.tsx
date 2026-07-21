@@ -6,6 +6,7 @@ import { updateTask, deleteTask } from '@/actions/tasks'
 import { assignTagToTask, removeTagFromTask } from '@/actions/tags'
 import { createSubtask, updateSubtask, deleteSubtask } from '@/actions/subtasks'
 import { toDateInputValue, formatDueDate } from '@/lib/date'
+import { ensureOnline } from '@/lib/toast'
 
 const DEFAULT_WIDTH = 384
 const MIN_WIDTH = 280
@@ -122,17 +123,20 @@ export default function TaskDetailPanel({
 
   const saveTitle = async () => {
     if (title.trim() === task.title) return
+    if (!ensureOnline()) return
     await updateTask(task.id, { title: title.trim() })
     onUpdate()
   }
 
   const saveNote = async () => {
     if (note === task.note) return
+    if (!ensureOnline()) return
     await updateTask(task.id, { note })
     onUpdate()
   }
 
   const handleDueDateChange = async (value: string) => {
+    if (!ensureOnline()) return
     setDueDate(value)
     const newDueDate = value ? new Date(value + 'T00:00:00') : null
     await updateTask(task.id, { dueDate: newDueDate })
@@ -140,6 +144,7 @@ export default function TaskDetailPanel({
   }
 
   const handlePriorityChange = async (nextPriority: string) => {
+    if (!ensureOnline()) return
     setPriority(nextPriority)
     setShowPriorityPicker(false)
     await updateTask(task.id, { priority: nextPriority })
@@ -147,6 +152,7 @@ export default function TaskDetailPanel({
   }
 
   const handleListChange = async (value: string) => {
+    if (!ensureOnline()) return
     setListId(value)
     setShowListPicker(false)
     await updateTask(task.id, { listId: value ? parseInt(value) : null })
@@ -154,6 +160,7 @@ export default function TaskDetailPanel({
   }
 
   const handleTagToggle = async (tagId: number) => {
+    if (!ensureOnline()) return
     const isAssigned = assignedTagIds.has(tagId)
     const newTags = new Set(assignedTagIds)
     if (isAssigned) {
@@ -169,6 +176,7 @@ export default function TaskDetailPanel({
 
   const handleDelete = async () => {
     if (!confirm('確定刪除此任務？')) return
+    if (!ensureOnline()) return
     await deleteTask(task.id)
     onUpdate()
     onClose()
@@ -178,6 +186,7 @@ export default function TaskDetailPanel({
     e.preventDefault()
     const trimmed = newSubtaskTitle.trim()
     if (!trimmed) return
+    if (!ensureOnline()) return
     const result = await createSubtask(task.id, trimmed)
     if (result.success && result.data) {
       setSubtasks((prev) => [...prev, result.data!])
@@ -187,6 +196,7 @@ export default function TaskDetailPanel({
   }
 
   const handleToggleSubtask = async (subtaskId: number, completed: boolean) => {
+    if (!ensureOnline()) return
     setSubtasks((prev) =>
       prev.map((s) => (s.id === subtaskId ? { ...s, completed } : s))
     )
@@ -197,11 +207,13 @@ export default function TaskDetailPanel({
   const handleRenameSubtask = async (subtaskId: number, title: string) => {
     const original = task.subtasks.find((s) => s.id === subtaskId)
     if (original && original.title === title) return
+    if (!ensureOnline()) return
     await updateSubtask(subtaskId, { title })
     onUpdate()
   }
 
   const handleDeleteSubtask = async (subtaskId: number) => {
+    if (!ensureOnline()) return
     setSubtasks((prev) => prev.filter((s) => s.id !== subtaskId))
     await deleteSubtask(subtaskId)
     onUpdate()
@@ -211,17 +223,27 @@ export default function TaskDetailPanel({
 
   return (
     <div
-      className="relative bg-white border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
-      style={{ width }}
+      className="fixed inset-0 z-50 md:z-auto md:relative md:inset-auto w-full md:w-[var(--detail-width)] bg-white md:border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
+      style={{ ['--detail-width' as string]: `${width}px` }}
     >
       <div
         onMouseDown={handleResizeStart}
-        className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
+        className="hidden md:block absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
         style={{ marginLeft: '-2px' }}
       />
 
       {/* 頂部圖示列：到期日 / 優先級 / 關閉 */}
       <div className="flex items-center gap-1 px-4 pt-4 pb-2">
+        <button
+          onClick={onClose}
+          title="返回"
+          className="md:hidden flex items-center gap-1 p-1.5 -ml-1.5 mr-1 rounded hover:bg-gray-100 text-gray-600"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
         <div className="relative" ref={datePickerRef}>
           <button
             onClick={() => setShowDatePicker((v) => !v)}
@@ -291,7 +313,7 @@ export default function TaskDetailPanel({
         <button
           onClick={onClose}
           title="關閉"
-          className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+          className="hidden md:block p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
         >
           ✕
         </button>

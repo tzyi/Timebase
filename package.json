@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@serwist/next": "^9.5.11",
     "bcrypt": "^6.0.0",
     "next": "^15.1.0",
     "next-auth": "^5.0.0-beta.32",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "serwist": "^9.5.11"
   },
   "devDependencies": {
     "@prisma/client": "^5.22.0",

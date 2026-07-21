@@ -3,10 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-interface AppRailProps {
-  userLabel: string
-}
-
 const NAV_ITEMS = [
   {
     href: '/tasks',
@@ -44,44 +40,42 @@ const NAV_ITEMS = [
       />
     ),
   },
+  {
+    href: '/account',
+    label: '帳號',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
+    ),
+  },
 ]
 
-export default function AppRail({ userLabel }: AppRailProps) {
+export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <div className="hidden md:flex w-16 bg-gray-50 border-r border-gray-200 flex-col items-center py-4 gap-2 flex-shrink-0">
-      <Link
-        href="/account"
-        title="帳號"
-        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors mb-2 ${
-          pathname === '/account'
-            ? 'bg-blue-500 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        }`}
-      >
-        {userLabel}
-      </Link>
-
-      <div className="w-8 border-t border-gray-200 mb-2" />
-
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
       {NAV_ITEMS.map(({ href, label, icon }) => {
         const isActive = pathname?.startsWith(href)
         return (
           <Link
             key={href}
             href={href}
-            title={label}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-              isActive ? 'bg-blue-500 text-white' : 'text-gray-500 hover:bg-gray-100'
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors ${
+              isActive ? 'text-blue-500' : 'text-gray-500'
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {icon}
             </svg>
+            {label}
           </Link>
         )
       })}
-    </div>
+    </nav>
   )
 }

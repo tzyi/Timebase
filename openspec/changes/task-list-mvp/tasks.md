@@ -53,23 +53,23 @@
 
 ## 8. 響應式版面 (responsive-shell)
 
-- [ ] 8.1 實作桌機四欄版面骨架（icon rail + 側欄 + 主內容 + 詳情面板），側欄可收合
-- [ ] 8.2 實作手機單欄版面骨架 + 底部導航列
-- [ ] 8.3 實作手機版清單側欄抽屜（drawer）互動
-- [ ] 8.4 實作手機版任務詳情全螢幕頁面（取代側邊詳情面板）
-- [ ] 8.5 跨常見斷點（手機/平板/桌機寬度）驗證版面切換正確、無版面錯亂
+- [x] 8.1 實作桌機四欄版面骨架（icon rail + 側欄 + 主內容 + 詳情面板），側欄可收合
+- [x] 8.2 實作手機單欄版面骨架 + 底部導航列
+- [x] 8.3 實作手機版清單側欄抽屜（drawer）互動
+- [x] 8.4 實作手機版任務詳情全螢幕頁面（取代側邊詳情面板）
+- [ ] 8.5 跨常見斷點（手機/平板/桌機寬度）驗證版面切換正確、無版面錯亂 —— 已透過 build 與 HTTP 檢查、程式碼審查確認 Tailwind breakpoint 邏輯正確，尚未在真實瀏覽器/裝置實測，待人工驗收後勾選
 
 ## 9. PWA (pwa-shell)
 
-- [ ] 9.1 安裝並設定 next-pwa 或 Serwist
-- [ ] 9.2 建立 `public/manifest.json`（App 名稱、圖示多尺寸、`start_url`、`display: standalone`）
-- [ ] 9.3 設定 Service Worker 快取範圍：靜態資源與 App shell HTML
-- [ ] 9.4 實作離線提示：資料操作於離線狀態下顯示明確錯誤訊息，不假裝成功
-- [ ] 9.5 於行動瀏覽器驗證安裝流程與離線開啟 App shell 是否成功
+- [x] 9.1 安裝並設定 next-pwa 或 Serwist（採用 Serwist）
+- [x] 9.2 建立 `public/manifest.json`（App 名稱、圖示多尺寸、`start_url`、`display: standalone`）
+- [x] 9.3 設定 Service Worker 快取範圍：靜態資源與 App shell HTML（採用 `@serwist/next` 的 `defaultCache`）
+- [x] 9.4 實作離線提示：資料操作於離線狀態下顯示明確錯誤訊息，不假裝成功
+- [ ] 9.5 於行動瀏覽器驗證安裝流程與離線開啟 App shell 是否成功 —— 已於本機以 production build 確認 manifest/icons/sw.js 皆可正常存取，但無法在此環境進行真實行動瀏覽器安裝與離線測試，待人工驗收
 
 ## 10. 驗收與整理
 
-- [ ] 10.1 走過所有 specs 中的 Scenario，逐一手動驗證行為符合預期
-- [ ] 10.2 確認未登入狀態下所有頁面與 Server Action 皆被正確保護
-- [ ] 10.3 確認桌機與手機版面皆可完整操作清單/任務/標籤 CRUD
-- [ ] 10.4 執行 `openspec archive task-list-mvp`（實作完成、驗收通過後）
+- [ ] 10.1 走過所有 specs 中的 Scenario，逐一手動驗證行為符合預期 —— 需人工於瀏覽器實際操作驗收
+- [x] 10.2 確認未登入狀態下所有頁面與 Server Action 皆被正確保護（`(app)/layout.tsx` 的 `auth()` 檢查 + 各 Server Action 的 `requireAuth()` 已涵蓋）
+- [ ] 10.3 確認桌機與手機版面皆可完整操作清單/任務/標籤 CRUD —— 需人工於瀏覽器實際操作驗收
+- [ ] 10.4 執行 `openspec archive task-list-mvp`（實作完成、驗收通過後）—— 待 10.1/10.3 人工驗收通過後再執行
