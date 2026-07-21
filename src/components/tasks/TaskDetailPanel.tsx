@@ -1,9 +1,13 @@
 'use client'
 
 import { Task, List, Tag } from '@prisma/client'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { updateTask, deleteTask } from '@/actions/tasks'
 import { assignTagToTask, removeTagFromTask } from '@/actions/tags'
+
+const DEFAULT_WIDTH = 384
+const MIN_WIDTH = 280
+const MAX_WIDTH = 720
 
 interface TaskDetailPanelProps {
   task: Task & {
@@ -30,6 +34,33 @@ export default function TaskDetailPanel({
   const [listId, setListId] = useState(task.listId?.toString() || '')
   const [assignedTagIds, setAssignedTagIds] = useState(new Set(task.tags.map((t) => t.tag.id)))
   const [isSaving, setIsSaving] = useState(false)
+  const [width, setWidth] = useState(DEFAULT_WIDTH)
+  const isResizingRef = useRef(false)
+
+  const handleResizeStart = useCallback(() => {
+    isResizingRef.current = true
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }, [])
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return
+      const newWidth = window.innerWidth - e.clientX
+      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, newWidth)))
+    }
+    const handleMouseUp = () => {
+      isResizingRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -86,7 +117,15 @@ export default function TaskDetailPanel({
   }
 
   return (
-    <div className="w-64 bg-white border-l border-gray-200 flex flex-col p-4 overflow-y-auto">
+    <div
+      className="relative bg-white border-l border-gray-200 flex flex-col p-4 overflow-y-auto flex-shrink-0"
+      style={{ width }}
+    >
+      <div
+        onMouseDown={handleResizeStart}
+        className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
+        style={{ marginLeft: '-2px' }}
+      />
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-900">詳情</h2>
         <button
