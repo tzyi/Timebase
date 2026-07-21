@@ -38,8 +38,10 @@ function getSnapshot() {
   return toasts
 }
 
+const emptyToasts: ToastItem[] = []
+
 function getServerSnapshot() {
-  return []
+  return emptyToasts
 }
 
 export function useToasts() {
