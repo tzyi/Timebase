@@ -50,6 +50,9 @@ export default function TaskDetailPanel({
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
   const [dueDate, setDueDate] = useState(task.dueDate ? toDateInputValue(new Date(task.dueDate)) : '')
+  const [dueTime, setDueTime] = useState(task.dueTime || '')
+  const [endTime, setEndTime] = useState(task.endTime || '')
+  const [allDay, setAllDay] = useState(task.allDay)
   const [priority, setPriority] = useState(task.priority)
   const [listId, setListId] = useState(task.listId?.toString() || '')
   const [assignedTagIds, setAssignedTagIds] = useState(new Set(task.tags.map((t) => t.tag.id)))
@@ -71,23 +74,15 @@ export default function TaskDetailPanel({
     setTitle(task.title)
     setNote(task.note)
     setDueDate(task.dueDate ? toDateInputValue(new Date(task.dueDate)) : '')
+    setDueTime(task.dueTime || '')
+    setEndTime(task.endTime || '')
+    setAllDay(task.allDay)
     setPriority(task.priority)
     setListId(task.listId?.toString() || '')
     setAssignedTagIds(new Set(task.tags.map((t) => t.tag.id)))
     setSubtasks(task.subtasks)
   }, [task])
 
-  useEffect(() => {
-    if (!showDatePicker) return
-    const input = dateInputRef.current
-    if (input && typeof input.showPicker === 'function') {
-      try {
-        input.showPicker()
-      } catch {
-        // 部分瀏覽器（如 Safari）不支援 showPicker，忽略即可，使用者仍可手動點擊輸入框
-      }
-    }
-  }, [showDatePicker])
 
   const handleResizeStart = useCallback(() => {
     isResizingRef.current = true
@@ -152,7 +147,40 @@ export default function TaskDetailPanel({
     if (!ensureOnline()) return
     setDueDate(value)
     const newDueDate = value ? new Date(value + 'T00:00:00') : null
-    await updateTask(task.id, { dueDate: newDueDate })
+    if (!value) {
+      setDueTime('')
+      setEndTime('')
+      await updateTask(task.id, { dueDate: newDueDate, dueTime: null, endTime: null })
+    } else {
+      await updateTask(task.id, { dueDate: newDueDate })
+    }
+    onUpdate()
+  }
+
+  const handleAllDayChange = async (checked: boolean) => {
+    if (!ensureOnline()) return
+    setAllDay(checked)
+    if (checked) {
+      setDueTime('')
+      setEndTime('')
+      await updateTask(task.id, { allDay: checked, dueTime: null, endTime: null })
+    } else {
+      await updateTask(task.id, { allDay: checked })
+    }
+    onUpdate()
+  }
+
+  const handleDueTimeChange = async (value: string) => {
+    if (!ensureOnline()) return
+    setDueTime(value)
+    await updateTask(task.id, { dueTime: value || null })
+    onUpdate()
+  }
+
+  const handleEndTimeChange = async (value: string) => {
+    if (!ensureOnline()) return
+    setEndTime(value)
+    await updateTask(task.id, { endTime: value || null })
     onUpdate()
   }
 
@@ -267,28 +295,68 @@ export default function TaskDetailPanel({
               <rect x="3" y="5" width="18" height="16" rx="2" />
               <path d="M8 3v4M16 3v4M3 10h18" />
             </svg>
-            {dueDate ? formatDueDate(new Date(dueDate + 'T00:00:00')) : '到期日'}
+            {dueDate
+              ? `${formatDueDate(new Date(dueDate + 'T00:00:00'))}${
+                  !allDay && dueTime ? ` ${dueTime}${endTime ? `-${endTime}` : ''}` : ''
+                }${allDay ? '（全天）' : ''}`
+              : '到期日'}
           </button>
           {showDatePicker && (
-            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-2">
+            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-3 w-56">
               <input
                 ref={dateInputRef}
                 type="date"
                 value={dueDate}
                 onChange={(e) => handleDueDateChange(e.target.value)}
-                className="text-sm border border-gray-300 rounded px-2 py-1"
+                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
                 autoFocus
               />
+
               {dueDate && (
-                <button
-                  onClick={() => {
-                    handleDueDateChange('')
-                    setShowDatePicker(false)
-                  }}
-                  className="w-full mt-1 text-xs text-red-500 hover:text-red-600"
-                >
-                  清除日期
-                </button>
+                <>
+                  <label className="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                    <input
+                      type="checkbox"
+                      checked={allDay}
+                      onChange={(e) => handleAllDayChange(e.target.checked)}
+                      className="w-3.5 h-3.5"
+                    />
+                    全天
+                  </label>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-0.5">開始時間</label>
+                      <input
+                        type="time"
+                        value={dueTime}
+                        onChange={(e) => handleDueTimeChange(e.target.value)}
+                        disabled={allDay}
+                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-0.5">結束時間</label>
+                      <input
+                        type="time"
+                        value={endTime}
+                        onChange={(e) => handleEndTimeChange(e.target.value)}
+                        disabled={allDay}
+                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      handleDueDateChange('')
+                      setShowDatePicker(false)
+                    }}
+                    className="w-full mt-2 text-xs text-red-500 hover:text-red-600"
+                  >
+                    清除日期
+                  </button>
+                </>
               )}
             </div>
           )}
