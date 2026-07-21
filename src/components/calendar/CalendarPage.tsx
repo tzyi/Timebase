@@ -3,9 +3,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { List, Tag } from '@prisma/client'
 import { getMonthTasks, updateTask, CalendarFilters as ServerCalendarFilters } from '@/actions/tasks'
-import { getToday } from '@/lib/calendarHelpers'
+import { getToday, dateToString } from '@/lib/calendarHelpers'
 import FilterBar from './FilterBar'
 import MonthView from './MonthView'
+import DayTasksList from './DayTasksList'
+import TaskDetailModal from './TaskDetailModal'
 import { CalendarView, CalendarFiltersState, TaskWithRelations } from './types'
 
 interface CalendarPageProps {
@@ -83,19 +85,21 @@ export default function CalendarPage({
     setFocusDate(newDate)
   }, [])
 
+  const handleModalClose = useCallback(() => {
+    setSelectedTaskId(null)
+  }, [])
+
   const monthLabel = `${focusDate.getFullYear()} 年 ${focusDate.getMonth() + 1} 月`
+  const focusDateTasks = monthTasks[dateToString(focusDate)] || []
+  const selectedTask =
+    selectedTaskId !== null
+      ? Object.values(monthTasks).flat().find((t) => t.id === selectedTaskId) || null
+      : null
 
   return (
     <div className="flex h-full bg-gray-100">
-      <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white p-4">
-        <p className="text-sm font-medium text-gray-700">焦點日期</p>
-        <p className="text-lg text-gray-900 mt-1">
-          {focusDate.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-        <p className="text-xs text-gray-400 mt-4">
-          已選任務：{selectedTaskId !== null ? `#${selectedTaskId}` : '無'}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">側邊任務列表開發中</p>
+      <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white">
+        <DayTasksList focusDate={focusDate} tasks={focusDateTasks} onTaskClick={handleTaskClick} />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col">
@@ -148,6 +152,15 @@ export default function CalendarPage({
           {isLoading && <p className="text-xs text-gray-400 mt-2">載入中...</p>}
         </div>
       </div>
+
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={selectedTaskId !== null}
+        onClose={handleModalClose}
+        onSave={() => refreshMonthTasks(focusDate, filters)}
+        lists={initialLists}
+        tags={initialTags}
+      />
     </div>
   )
 }
