@@ -42,41 +42,41 @@
 
 ## 3. 日曆頁面框架
 
-- [ ] 3.1 建立 `src/components/calendar/CalendarPage.tsx`：
+- [x] 3.1 建立 `src/components/calendar/CalendarPage.tsx`：
   - 定義 `CalendarState` 類型：{ view, focusDate, filters, selectedTaskId }
   - 使用今天作為 focusDate 初始化狀態
   - 渲染：LeftPanel + RightPanel (Tab + MainView)
-- [ ] 3.2 建立 `src/components/calendar/FilterBar.tsx`：
+- [x] 3.2 建立 `src/components/calendar/FilterBar.tsx`：
   - 清單、標籤、優先級的下拉式清單（多選）
   - 狀態：過濾物件
   - 回呼：`onFilterChange(newFilters)`
-- [ ] 3.3 建立 `src/app/(app)/calendar/page.tsx`：
+- [x] 3.3 建立 `src/app/(app)/calendar/page.tsx`：
   - 呈現 CalendarPage 的伺服器元件
   - 傳遞使用者工作階段檢查（未驗證時重定向）
-- [ ] 3.4 建立選項卡切換使用者介面：
+- [x] 3.4 建立選項卡切換使用者介面：
   - 三個按鈕：[Month] [Week] [Day]
   - 按一下按鈕會更新 `currentView` 狀態（無頁面重新載入）
-- [ ] 3.5 驗證頁面在 `/calendar` 載入
+- [x] 3.5 驗證頁面在 `/calendar` 載入
 
 ## 4. 月視圖
 
-- [ ] 4.1 建立 `src/components/calendar/MonthView.tsx`：
+- [x] 4.1 建立 `src/components/calendar/MonthView.tsx`：
   - 顯示日曆網格（日期儲存格）
   - 每個儲存格顯示：日期數字 + 星期幾標籤
   - 儲存格樣式：週末著色、今天突顯
-- [ ] 4.2 擷取並在儲存格中顯示任務：
+- [x] 4.2 擷取並在儲存格中顯示任務：
   - 使用過濾條件呼叫 `getMonthTasks()`
   - 每個儲存格顯示最多 4 個任務（按優先級排序）
   - 灰出已完成任務
   - 如果 > 4 個任務，顯示「+N 個更多」
-- [ ] 4.3 實現「+N 個更多」展開下拉式清單：
+- [x] 4.3 實現「+N 個更多」展開下拉式清單：
   - 按一下「+N 個更多」會在下拉式清單中顯示該日期的所有任務
   - 下拉式清單中的每個任務可點擊以開啟模式
-- [ ] 4.4 新增日期點擊處理程式：
+- [x] 4.4 新增日期點擊處理程式：
   - 按一下日期儲存格會更新 `focusDate` 狀態
   - 側邊面板和日/週視圖應該回應
-- [ ] 4.5 使用 Tailwind CSS 新增樣式
-- [ ] 4.6 使用各種任務計數測試月視圖
+- [x] 4.5 使用 Tailwind CSS 新增樣式
+- [x] 4.6 使用各種任務計數測試月視圖
 
 ## 5. 左側邊面板
 

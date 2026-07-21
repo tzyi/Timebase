@@ -1,7 +1,36 @@
-export default function CalendarPage() {
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import { getLists } from '@/actions/lists'
+import { getTags } from '@/actions/tags'
+import { getMonthTasks } from '@/actions/tasks'
+import CalendarPage from '@/components/calendar/CalendarPage'
+
+export const dynamic = 'force-dynamic'
+
+export default async function CalendarRoutePage() {
+  const session = await auth()
+
+  if (!session) {
+    redirect('/login')
+  }
+
+  const today = new Date()
+
+  const [listsResult, tagsResult, monthTasksResult] = await Promise.all([
+    getLists(),
+    getTags(),
+    getMonthTasks(today.getFullYear(), today.getMonth()),
+  ])
+
+  const lists = listsResult.success && listsResult.data ? listsResult.data : []
+  const tags = tagsResult.success && tagsResult.data ? tagsResult.data : []
+  const monthTasks = monthTasksResult.success && monthTasksResult.data ? monthTasksResult.data : {}
+
   return (
-    <div className="h-full flex items-center justify-center bg-gray-100">
-      <p className="text-gray-500 text-sm">月曆功能開發中</p>
-    </div>
+    <CalendarPage
+      initialLists={lists}
+      initialTags={tags}
+      initialMonthTasks={monthTasks}
+    />
   )
 }
