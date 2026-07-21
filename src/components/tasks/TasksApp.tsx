@@ -155,7 +155,7 @@ export default function TasksApp({
   const selectedTask = tasks.find((t) => t.id === selectedTaskId)
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-full bg-gray-100">
       <Sidebar
         lists={lists}
         tags={tags}
