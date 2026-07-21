@@ -1,19 +1,37 @@
 'use client'
 
-import { Task, List, Tag } from '@prisma/client'
+import { Task, List, Tag, Subtask } from '@prisma/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { updateTask, deleteTask } from '@/actions/tasks'
 import { assignTagToTask, removeTagFromTask } from '@/actions/tags'
-import { toDateInputValue } from '@/lib/date'
+import { createSubtask, updateSubtask, deleteSubtask } from '@/actions/subtasks'
+import { toDateInputValue, formatDueDate } from '@/lib/date'
 
 const DEFAULT_WIDTH = 384
 const MIN_WIDTH = 280
 const MAX_WIDTH = 720
 
+const PRIORITY_COLORS: Record<string, string> = {
+  none: '#9ca3af',
+  low: '#fbbf24',
+  medium: '#f97316',
+  high: '#ef4444',
+}
+
+const PRIORITY_ORDER = ['none', 'low', 'medium', 'high']
+
+const PRIORITY_LABELS: Record<string, string> = {
+  none: '無優先級',
+  low: '低優先級',
+  medium: '中優先級',
+  high: '高優先級',
+}
+
 interface TaskDetailPanelProps {
   task: Task & {
     list: List | null
     tags: Array<{ tag: Tag }>
+    subtasks: Subtask[]
   }
   lists: (List & { uncompletedCount?: number })[]
   allTags: (Tag & { taskCount?: number })[]
@@ -34,9 +52,23 @@ export default function TaskDetailPanel({
   const [priority, setPriority] = useState(task.priority)
   const [listId, setListId] = useState(task.listId?.toString() || '')
   const [assignedTagIds, setAssignedTagIds] = useState(new Set(task.tags.map((t) => t.tag.id)))
-  const [isSaving, setIsSaving] = useState(false)
+  const [subtasks, setSubtasks] = useState(task.subtasks)
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
+  const [showListPicker, setShowListPicker] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showTagPicker, setShowTagPicker] = useState(false)
   const [width, setWidth] = useState(DEFAULT_WIDTH)
   const isResizingRef = useRef(false)
+
+  useEffect(() => {
+    setTitle(task.title)
+    setNote(task.note)
+    setDueDate(task.dueDate ? toDateInputValue(new Date(task.dueDate)) : '')
+    setPriority(task.priority)
+    setListId(task.listId?.toString() || '')
+    setAssignedTagIds(new Set(task.tags.map((t) => t.tag.id)))
+    setSubtasks(task.subtasks)
+  }, [task])
 
   const handleResizeStart = useCallback(() => {
     isResizingRef.current = true
@@ -63,63 +95,99 @@ export default function TaskDetailPanel({
     }
   }, [])
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      const newDueDate = dueDate ? new Date(dueDate + 'T00:00:00') : null
+  const saveTitle = async () => {
+    if (title.trim() === task.title) return
+    await updateTask(task.id, { title: title.trim() })
+    onUpdate()
+  }
 
-      await updateTask(task.id, {
-        title: title.trim(),
-        note,
-        dueDate: newDueDate,
-        priority,
-        listId: listId ? parseInt(listId) : null,
-      })
+  const saveNote = async () => {
+    if (note === task.note) return
+    await updateTask(task.id, { note })
+    onUpdate()
+  }
 
-      // 同步標籤
-      const oldTagIds = new Set(task.tags.map((t) => t.tag.id))
-      for (const tagId of oldTagIds) {
-        if (!assignedTagIds.has(tagId)) {
-          await removeTagFromTask(task.id, tagId)
-        }
-      }
-      for (const tagId of assignedTagIds) {
-        if (!oldTagIds.has(tagId)) {
-          await assignTagToTask(task.id, tagId)
-        }
-      }
+  const handleDueDateChange = async (value: string) => {
+    setDueDate(value)
+    const newDueDate = value ? new Date(value + 'T00:00:00') : null
+    await updateTask(task.id, { dueDate: newDueDate })
+    onUpdate()
+  }
 
-      onUpdate()
-    } finally {
-      setIsSaving(false)
+  const handlePriorityCycle = async () => {
+    const currentIndex = PRIORITY_ORDER.indexOf(priority)
+    const nextPriority = PRIORITY_ORDER[(currentIndex + 1) % PRIORITY_ORDER.length]
+    setPriority(nextPriority)
+    await updateTask(task.id, { priority: nextPriority })
+    onUpdate()
+  }
+
+  const handleListChange = async (value: string) => {
+    setListId(value)
+    setShowListPicker(false)
+    await updateTask(task.id, { listId: value ? parseInt(value) : null })
+    onUpdate()
+  }
+
+  const handleTagToggle = async (tagId: number) => {
+    const isAssigned = assignedTagIds.has(tagId)
+    const newTags = new Set(assignedTagIds)
+    if (isAssigned) {
+      newTags.delete(tagId)
+      await removeTagFromTask(task.id, tagId)
+    } else {
+      newTags.add(tagId)
+      await assignTagToTask(task.id, tagId)
     }
+    setAssignedTagIds(newTags)
+    onUpdate()
   }
 
   const handleDelete = async () => {
     if (!confirm('確定刪除此任務？')) return
-    setIsSaving(true)
-    try {
-      await deleteTask(task.id)
+    await deleteTask(task.id)
+    onUpdate()
+    onClose()
+  }
+
+  const handleAddSubtask = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = newSubtaskTitle.trim()
+    if (!trimmed) return
+    const result = await createSubtask(task.id, trimmed)
+    if (result.success && result.data) {
+      setSubtasks((prev) => [...prev, result.data!])
+      setNewSubtaskTitle('')
       onUpdate()
-      onClose()
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  const handleTagToggle = (tagId: number) => {
-    const newTags = new Set(assignedTagIds)
-    if (newTags.has(tagId)) {
-      newTags.delete(tagId)
-    } else {
-      newTags.add(tagId)
-    }
-    setAssignedTagIds(newTags)
+  const handleToggleSubtask = async (subtaskId: number, completed: boolean) => {
+    setSubtasks((prev) =>
+      prev.map((s) => (s.id === subtaskId ? { ...s, completed } : s))
+    )
+    await updateSubtask(subtaskId, { completed })
+    onUpdate()
   }
+
+  const handleRenameSubtask = async (subtaskId: number, title: string) => {
+    const original = task.subtasks.find((s) => s.id === subtaskId)
+    if (original && original.title === title) return
+    await updateSubtask(subtaskId, { title })
+    onUpdate()
+  }
+
+  const handleDeleteSubtask = async (subtaskId: number) => {
+    setSubtasks((prev) => prev.filter((s) => s.id !== subtaskId))
+    await deleteSubtask(subtaskId)
+    onUpdate()
+  }
+
+  const currentList = lists.find((l) => l.id.toString() === listId)
 
   return (
     <div
-      className="relative bg-white border-l border-gray-200 flex flex-col p-4 overflow-y-auto flex-shrink-0"
+      className="relative bg-white border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
       style={{ width }}
     >
       <div
@@ -127,111 +195,232 @@ export default function TaskDetailPanel({
         className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
         style={{ marginLeft: '-2px' }}
       />
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">詳情</h2>
+
+      {/* 頂部圖示列：到期日 / 優先級 / 關閉 */}
+      <div className="flex items-center gap-1 px-4 pt-4 pb-2">
+        <div className="relative">
+          <button
+            onClick={() => setShowDatePicker((v) => !v)}
+            title="設定到期日"
+            className={`flex items-center gap-1 px-2 py-1.5 rounded hover:bg-gray-100 text-sm ${dueDate ? 'text-blue-600' : 'text-gray-500'}`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M8 3v4M16 3v4M3 10h18" />
+            </svg>
+            {dueDate ? formatDueDate(new Date(dueDate + 'T00:00:00')) : '到期日'}
+          </button>
+          {showDatePicker && (
+            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-2">
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => handleDueDateChange(e.target.value)}
+                className="text-sm border border-gray-300 rounded px-2 py-1"
+                autoFocus
+              />
+              {dueDate && (
+                <button
+                  onClick={() => {
+                    handleDueDateChange('')
+                    setShowDatePicker(false)
+                  }}
+                  className="w-full mt-1 text-xs text-red-500 hover:text-red-600"
+                >
+                  清除日期
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1" />
+
+        <button
+          onClick={handlePriorityCycle}
+          title={PRIORITY_LABELS[priority]}
+          className="p-1.5 rounded hover:bg-gray-100"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={PRIORITY_COLORS[priority]} stroke={PRIORITY_COLORS[priority]} strokeWidth="2">
+            <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={priority === 'none' ? 'none' : PRIORITY_COLORS[priority]} />
+          </svg>
+        </button>
+
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600"
+          title="關閉"
+          className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
         >
           ✕
         </button>
       </div>
 
-      <div className="space-y-4 flex-1">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">標題</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <div className="flex-1 px-4 pb-4">
+        {/* 標題 */}
+        <textarea
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={saveTitle}
+          rows={1}
+          placeholder="任務標題"
+          className="w-full resize-none text-xl font-semibold text-gray-900 border-none outline-none focus:ring-0 p-0 mb-2"
+        />
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">備註</label>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="w-full px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-        </div>
+        {/* 備註 */}
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          onBlur={saveNote}
+          rows={2}
+          placeholder="新增備註..."
+          className="w-full resize-none text-sm text-gray-500 border-none outline-none focus:ring-0 p-0 mb-4"
+        />
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">到期日</label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="w-full px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {/* 子任務 */}
+        <div className="mt-2">
+          {subtasks.map((subtask) => (
+            <SubtaskRow
+              key={subtask.id}
+              subtask={subtask}
+              onToggle={handleToggleSubtask}
+              onRename={handleRenameSubtask}
+              onDelete={handleDeleteSubtask}
+            />
+          ))}
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">優先級</label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="w-full px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <form onSubmit={handleAddSubtask} className="flex items-center gap-2 py-2 border-b border-gray-100">
+            <span className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
+            <input
+              type="text"
+              value={newSubtaskTitle}
+              onChange={(e) => setNewSubtaskTitle(e.target.value)}
+              placeholder="新增子任務"
+              className="flex-1 text-sm text-gray-700 border-none outline-none focus:ring-0 p-0 placeholder:text-gray-400"
+            />
+          </form>
+        </div>
+      </div>
+
+      {/* 底部工具列 */}
+      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
+        <div className="relative">
+          <button
+            onClick={() => setShowListPicker((v) => !v)}
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-100"
           >
-            <option value="none">無</option>
-            <option value="low">低</option>
-            <option value="medium">中</option>
-            <option value="high">高</option>
-          </select>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 7l3-3h5l2 2h8v11a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+            </svg>
+            {currentList ? currentList.name : '收集箱'}
+          </button>
+          {showListPicker && (
+            <div className="absolute left-0 bottom-full mb-1 z-10 bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[140px]">
+              <button
+                onClick={() => handleListChange('')}
+                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${!listId ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+              >
+                收集箱
+              </button>
+              {lists.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => handleListChange(l.id.toString())}
+                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${listId === l.id.toString() ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+                >
+                  {l.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">清單</label>
-          <select
-            value={listId}
-            onChange={(e) => setListId(e.target.value)}
-            className="w-full px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">收集箱</option>
-            {lists.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">標籤</label>
-          <div className="space-y-2">
-            {allTags.map((tag) => (
-              <label key={tag.id} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={assignedTagIds.has(tag.id)}
-                  onChange={() => handleTagToggle(tag.id)}
-                  className="w-4 h-4 rounded"
-                />
-                <span className="text-sm text-gray-700">{tag.name}</span>
-              </label>
-            ))}
+        <div className="flex items-center gap-1">
+          <div className="relative">
+            <button
+              onClick={() => setShowTagPicker((v) => !v)}
+              title="標籤"
+              className="p-1.5 rounded hover:bg-gray-100 text-gray-500"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L4 3a1 1 0 00-1 1l.24 5.59a2 2 0 00.58 1.41l9.59 9.58a2 2 0 002.83 0l5.35-5.35a2 2 0 000-2.82z" />
+                <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
+              </svg>
+            </button>
+            {showTagPicker && (
+              <div className="absolute right-0 bottom-full mb-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-2 min-w-[160px]">
+                {allTags.length === 0 && (
+                  <p className="text-xs text-gray-400 px-1 py-1">尚無標籤</p>
+                )}
+                {allTags.map((tag) => (
+                  <label key={tag.id} className="flex items-center gap-2 cursor-pointer px-1 py-1 hover:bg-gray-50 rounded">
+                    <input
+                      type="checkbox"
+                      checked={assignedTagIds.has(tag.id)}
+                      onChange={() => handleTagToggle(tag.id)}
+                      className="w-3.5 h-3.5 rounded"
+                    />
+                    <span className="text-sm text-gray-700">{tag.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
+
+          <button
+            onClick={handleDelete}
+            title="刪除任務"
+            className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6" />
+            </svg>
+          </button>
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="space-y-2 pt-4 border-t border-gray-200">
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          {isSaving ? '保存中...' : '保存'}
-        </button>
-        <button
-          onClick={handleDelete}
-          disabled={isSaving}
-          className="w-full px-3 py-2 border border-red-300 text-red-600 rounded text-sm font-medium hover:bg-red-50 disabled:opacity-50"
-        >
-          刪除任務
-        </button>
-      </div>
+function SubtaskRow({
+  subtask,
+  onToggle,
+  onRename,
+  onDelete,
+}: {
+  subtask: Subtask
+  onToggle: (id: number, completed: boolean) => void
+  onRename: (id: number, title: string) => void
+  onDelete: (id: number) => void
+}) {
+  const [title, setTitle] = useState(subtask.title)
+
+  useEffect(() => {
+    setTitle(subtask.title)
+  }, [subtask.title])
+
+  return (
+    <div className="flex items-center gap-2 py-2 border-b border-gray-100 group">
+      <input
+        type="checkbox"
+        checked={subtask.completed}
+        onChange={(e) => onToggle(subtask.id, e.target.checked)}
+        className="w-4 h-4 rounded flex-shrink-0 cursor-pointer"
+      />
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onBlur={() => onRename(subtask.id, title.trim())}
+        className={`flex-1 text-sm border-none outline-none focus:ring-0 p-0 bg-transparent ${
+          subtask.completed ? 'line-through text-gray-400' : 'text-gray-700'
+        }`}
+      />
+      <button
+        onClick={() => onDelete(subtask.id)}
+        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 text-xs px-1"
+      >
+        ✕
+      </button>
     </div>
   )
 }

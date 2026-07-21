@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { List, Tag, Task } from '@prisma/client'
+import { List, Tag, Task, Subtask } from '@prisma/client'
 import Sidebar from './Sidebar'
 import TaskListView from './TaskListView'
 import TaskDetailPanel from './TaskDetailPanel'
@@ -17,6 +17,7 @@ import { getLists } from '@/actions/lists'
 type TaskWithRelations = Task & {
   list: List | null
   tags: Array<{ tag: Tag }>
+  subtasks: Subtask[]
 }
 
 type ListWithCount = List & { uncompletedCount?: number }

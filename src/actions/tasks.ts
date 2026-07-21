@@ -38,6 +38,7 @@ export async function createTask(
       include: {
         tags: { include: { tag: true } },
         list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
@@ -80,6 +81,7 @@ export async function updateTask(
       include: {
         tags: { include: { tag: true } },
         list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
@@ -126,6 +128,7 @@ export async function toggleTaskComplete(id: number, completed: boolean) {
       include: {
         tags: { include: { tag: true } },
         list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
@@ -155,6 +158,7 @@ export async function postponeTask(id: number) {
       include: {
         tags: { include: { tag: true } },
         list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
@@ -227,6 +231,7 @@ export async function getTasksForView(view: TaskView) {
       include: {
         tags: { include: { tag: true } },
         list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
@@ -253,6 +258,7 @@ export async function getTodayViewGrouped() {
         include: {
           tags: { include: { tag: true } },
           list: true,
+          subtasks: { orderBy: { sortOrder: 'asc' } },
         },
       }),
       prisma.task.findMany({
@@ -265,6 +271,7 @@ export async function getTodayViewGrouped() {
         include: {
           tags: { include: { tag: true } },
           list: true,
+          subtasks: { orderBy: { sortOrder: 'asc' } },
         },
       }),
     ])
