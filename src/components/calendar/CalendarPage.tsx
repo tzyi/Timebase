@@ -36,6 +36,7 @@ export default function CalendarPage({
   initialMonthTasks,
 }: CalendarPageProps) {
   const [view, setView] = useState<CalendarView>('month')
+  const [viewReady, setViewReady] = useState(false)
   const [focusDate, setFocusDate] = useState<Date>(getToday())
   const [filters, setFilters] = useState<CalendarFiltersState>({
     listIds: [],
@@ -98,6 +99,15 @@ export default function CalendarPage({
   }, [view, refreshMonthTasks, refreshWeekTasks, refreshDayTasks])
 
   useEffect(() => {
+    const saved = window.localStorage.getItem('calendar:view')
+    if (saved === 'month' || saved === 'week' || saved === 'day') {
+      setView(saved)
+    }
+    setViewReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!viewReady) return
     if (view === 'month') {
       refreshMonthTasks(focusDate, filters)
     } else if (view === 'week') {
@@ -106,7 +116,12 @@ export default function CalendarPage({
       refreshDayTasks(focusDate, filters)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate(), filters])
+  }, [viewReady, view, focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate(), filters])
+
+  useEffect(() => {
+    if (!viewReady) return
+    window.localStorage.setItem('calendar:view', view)
+  }, [viewReady, view])
 
   const handleDateClick = useCallback((date: Date) => {
     setFocusDate(date)
@@ -268,7 +283,8 @@ export default function CalendarPage({
         <FilterBar lists={initialLists} tags={initialTags} filters={filters} onFilterChange={setFilters} />
 
         <div className="flex-1 overflow-auto p-4">
-          {view === 'month' && (
+          {!viewReady && <p className="text-xs text-gray-400">載入中...</p>}
+          {viewReady && view === 'month' && (
             <MonthView
               monthTasks={monthTasks}
               year={focusDate.getFullYear()}
@@ -280,7 +296,7 @@ export default function CalendarPage({
               onMonthChange={handleMonthChange}
             />
           )}
-          {view === 'week' && (
+          {viewReady && view === 'week' && (
             <WeekView
               weekTasks={weekTasks}
               weekStart={weekStart}
@@ -290,7 +306,7 @@ export default function CalendarPage({
               onTaskTimeUpdate={handleTaskTimeUpdate}
             />
           )}
-          {view === 'day' && (
+          {viewReady && view === 'day' && (
             <DayView
               dayTasks={dayTasks}
               focusDate={focusDate}
