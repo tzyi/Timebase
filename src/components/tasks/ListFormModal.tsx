@@ -1,21 +1,31 @@
 'use client'
 
-import { useState } from 'react'
-import { createList } from '@/actions/lists'
+import { useEffect, useState } from 'react'
+import { List } from '@prisma/client'
+import { createList, updateList } from '@/actions/lists'
 import { ensureOnline } from '@/lib/toast'
 
 interface ListFormModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  list?: List | null
 }
 
 const colors = ['gray', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'purple', 'pink']
 
-export default function ListFormModal({ isOpen, onClose, onSuccess }: ListFormModalProps) {
+export default function ListFormModal({ isOpen, onClose, onSuccess, list = null }: ListFormModalProps) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('blue')
   const [isLoading, setIsLoading] = useState(false)
+  const isEditing = !!list
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(list?.name ?? '')
+      setColor(list?.color ?? 'blue')
+    }
+  }, [isOpen, list])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +33,9 @@ export default function ListFormModal({ isOpen, onClose, onSuccess }: ListFormMo
     setIsLoading(true)
 
     try {
-      const result = await createList(name, color)
+      const result = isEditing
+        ? await updateList(list!.id, { name, color })
+        : await createList(name, color)
       if (result.success) {
         setName('')
         setColor('blue')
@@ -40,7 +52,7 @@ export default function ListFormModal({ isOpen, onClose, onSuccess }: ListFormMo
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">新增清單</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{isEditing ? '編輯清單' : '新增清單'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -95,7 +107,7 @@ export default function ListFormModal({ isOpen, onClose, onSuccess }: ListFormMo
               disabled={isLoading || !name.trim()}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 disabled:bg-gray-400"
             >
-              {isLoading ? '保存中...' : '新增'}
+              {isLoading ? '保存中...' : isEditing ? '儲存' : '新增'}
             </button>
             <button
               type="button"

@@ -1,21 +1,31 @@
 'use client'
 
-import { useState } from 'react'
-import { createTag } from '@/actions/tags'
+import { useEffect, useState } from 'react'
+import { Tag } from '@prisma/client'
+import { createTag, updateTag } from '@/actions/tags'
 import { ensureOnline } from '@/lib/toast'
 
 interface TagFormModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  tag?: Tag | null
 }
 
 const colors = ['gray', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'purple', 'pink']
 
-export default function TagFormModal({ isOpen, onClose, onSuccess }: TagFormModalProps) {
+export default function TagFormModal({ isOpen, onClose, onSuccess, tag = null }: TagFormModalProps) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('blue')
   const [isLoading, setIsLoading] = useState(false)
+  const isEditing = !!tag
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(tag?.name ?? '')
+      setColor(tag?.color ?? 'blue')
+    }
+  }, [isOpen, tag])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +33,9 @@ export default function TagFormModal({ isOpen, onClose, onSuccess }: TagFormModa
     setIsLoading(true)
 
     try {
-      const result = await createTag(name, color)
+      const result = isEditing
+        ? await updateTag(tag!.id, { name, color })
+        : await createTag(name, color)
       if (result.success) {
         setName('')
         setColor('blue')
@@ -40,7 +52,7 @@ export default function TagFormModal({ isOpen, onClose, onSuccess }: TagFormModa
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">新增標籤</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{isEditing ? '編輯標籤' : '新增標籤'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -95,7 +107,7 @@ export default function TagFormModal({ isOpen, onClose, onSuccess }: TagFormModa
               disabled={isLoading || !name.trim()}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 disabled:bg-gray-400"
             >
-              {isLoading ? '保存中...' : '新增'}
+              {isLoading ? '保存中...' : isEditing ? '儲存' : '新增'}
             </button>
             <button
               type="button"
