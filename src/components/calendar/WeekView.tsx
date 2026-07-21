@@ -15,6 +15,7 @@ import {
 } from '@/lib/calendarHelpers'
 import { classifyTaskTime, TaskTimeType } from '@/lib/taskTimeClassification'
 import { calculateTaskLayout } from '@/lib/taskLayout'
+import { useCurrentTime } from '@/hooks/useCurrentTime'
 import { TaskWithRelations } from './types'
 
 interface WeekViewProps {
@@ -49,6 +50,8 @@ export default function WeekView({
 }: WeekViewProps) {
   const days = getWeekDays(weekStart)
   const today = new Date()
+  const now = useCurrentTime()
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null)
   const [dragDuration, setDragDuration] = useState<number>(MIN_DURATION)
   const [dragOverInfo, setDragOverInfo] = useState<{ dateStr: string; startMinutes: number } | null>(null)
@@ -259,6 +262,15 @@ export default function WeekView({
                       <span className="inline-block -translate-y-1/2 ml-1 text-[10px] text-white bg-blue-500 px-1 rounded shadow">
                         {minutesToTime(dragOverInfo.startMinutes)}
                       </span>
+                    </div>
+                  )}
+                  {isSameDay(date, today) && (
+                    <div
+                      className="absolute left-0 right-0 z-10 pointer-events-none flex items-center"
+                      style={{ top: currentMinutes }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 -translate-x-[3px] -translate-y-1/2" />
+                      <div className="flex-1 border-t border-red-500 -translate-y-1/2" />
                     </div>
                   )}
                 </div>
