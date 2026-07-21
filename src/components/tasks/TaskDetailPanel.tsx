@@ -4,6 +4,7 @@ import { Task, List, Tag } from '@prisma/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { updateTask, deleteTask } from '@/actions/tasks'
 import { assignTagToTask, removeTagFromTask } from '@/actions/tags'
+import { toDateInputValue } from '@/lib/date'
 
 const DEFAULT_WIDTH = 384
 const MIN_WIDTH = 280
@@ -29,7 +30,7 @@ export default function TaskDetailPanel({
 }: TaskDetailPanelProps) {
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
-  const [dueDate, setDueDate] = useState(task.dueDate ? task.dueDate.toISOString().split('T')[0] : '')
+  const [dueDate, setDueDate] = useState(task.dueDate ? toDateInputValue(new Date(task.dueDate)) : '')
   const [priority, setPriority] = useState(task.priority)
   const [listId, setListId] = useState(task.listId?.toString() || '')
   const [assignedTagIds, setAssignedTagIds] = useState(new Set(task.tags.map((t) => t.tag.id)))
