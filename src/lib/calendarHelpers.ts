@@ -111,6 +111,18 @@ const COLOR_MAP: { [key: string]: string } = {
   gray: 'bg-gray-100',
 };
 
+const FADED_COLOR_MAP: { [key: string]: string } = {
+  red: 'bg-red-100/50',
+  orange: 'bg-orange-100/50',
+  yellow: 'bg-yellow-100/50',
+  green: 'bg-green-100/50',
+  blue: 'bg-blue-100/50',
+  indigo: 'bg-indigo-100/50',
+  purple: 'bg-purple-100/50',
+  pink: 'bg-pink-100/50',
+  gray: 'bg-gray-100/50',
+};
+
 const TEXT_COLOR_MAP: { [key: string]: string } = {
   red: 'text-red-700',
   orange: 'text-orange-700',
@@ -130,29 +142,32 @@ interface TaskForColor {
   status?: string;
 }
 
+function isBeforeToday(date: Date): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const compareDate = new Date(date);
+  compareDate.setHours(0, 0, 0, 0);
+  return compareDate < today;
+}
+
 export function getTaskBackgroundColor(task: TaskForColor): string {
   if (task.completedAt || task.status === 'done') {
     return 'bg-gray-200';
   }
 
-  if (task.dueDate && new Date(task.dueDate) < new Date()) {
-    return 'bg-gray-200';
+  const colorKey = task.list && task.list.color ? task.list.color : 'blue';
+  const isPastDue = !!task.dueDate && isBeforeToday(new Date(task.dueDate));
+
+  if (isPastDue) {
+    return FADED_COLOR_MAP[colorKey] || 'bg-blue-100/50';
   }
 
-  if (task.list && task.list.color) {
-    return COLOR_MAP[task.list.color] || 'bg-blue-100';
-  }
-
-  return 'bg-blue-100';
+  return COLOR_MAP[colorKey] || 'bg-blue-100';
 }
 
 export function getTaskTextColor(task: TaskForColor): string {
   if (task.completedAt || task.status === 'done') {
     return 'text-gray-500';
-  }
-
-  if (task.dueDate && new Date(task.dueDate) < new Date()) {
-    return 'text-gray-600';
   }
 
   if (task.list && task.list.color) {
