@@ -32,6 +32,7 @@ interface WeekViewProps {
     newDueTime: string,
     newEndTime: string
   ) => Promise<boolean>
+  onNewTask?: (date: Date, dueTime: string, endTime: string) => void
 }
 
 const HOUR_HEIGHT = 60
@@ -47,6 +48,7 @@ export default function WeekView({
   onDateClick,
   onTaskClick,
   onTaskTimeUpdate,
+  onNewTask,
 }: WeekViewProps) {
   const days = getWeekDays(weekStart)
   const today = new Date()
@@ -105,6 +107,17 @@ export default function WeekView({
         console.error('Failed to update task time')
       }
     }
+  }
+
+  const handleColumnDoubleClick = (e: React.MouseEvent, date: Date) => {
+    if (!onNewTask) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
+    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
+    const startMinutes = Math.min(Math.max(snapped, 0), DAY_MINUTES - MIN_DURATION)
+    const endMinutes = Math.min(startMinutes + 60, DAY_MINUTES)
+    onNewTask(date, minutesToTime(startMinutes), minutesToTime(endMinutes))
   }
 
   return (
@@ -210,6 +223,7 @@ export default function WeekView({
                   style={{ height: HOUR_HEIGHT * 24 }}
                   onDragOver={(e) => handleColumnDragOver(e, dateStr)}
                   onDrop={(e) => handleColumnDrop(e, dateStr)}
+                  onDoubleClick={(e) => handleColumnDoubleClick(e, date)}
                 >
                   {HOURS.map((hour) => (
                     <div

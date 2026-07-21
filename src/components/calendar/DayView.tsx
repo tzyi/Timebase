@@ -30,6 +30,7 @@ interface DayViewProps {
     newDueTime: string,
     newEndTime: string
   ) => Promise<boolean>
+  onNewTask?: (date: Date, dueTime: string, endTime: string) => void
 }
 
 const HOUR_HEIGHT = 60
@@ -46,6 +47,7 @@ export default function DayView({
   onNextDay,
   onToday,
   onTaskTimeUpdate,
+  onNewTask,
 }: DayViewProps) {
   const today = new Date()
   const isToday = isSameDay(focusDate, today)
@@ -106,6 +108,17 @@ export default function DayView({
         console.error('Failed to update task time')
       }
     }
+  }
+
+  const handleColumnDoubleClick = (e: React.MouseEvent) => {
+    if (!onNewTask) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
+    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
+    const startMinutes = Math.min(Math.max(snapped, 0), DAY_MINUTES - MIN_DURATION)
+    const endMinutes = Math.min(startMinutes + 60, DAY_MINUTES)
+    onNewTask(focusDate, minutesToTime(startMinutes), minutesToTime(endMinutes))
   }
 
   return (
@@ -182,6 +195,7 @@ export default function DayView({
             style={{ height: HOUR_HEIGHT * 24 }}
             onDragOver={handleColumnDragOver}
             onDrop={handleColumnDrop}
+            onDoubleClick={handleColumnDoubleClick}
           >
             {HOURS.map((hour) => (
               <div

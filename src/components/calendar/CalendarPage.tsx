@@ -16,6 +16,7 @@ import MonthView from './MonthView'
 import WeekView from './WeekView'
 import DayView from './DayView'
 import DayTasksList from './DayTasksList'
+import NewTaskModal from './NewTaskModal'
 import TaskDetailPanel from '@/components/tasks/TaskDetailPanel'
 import { CalendarView, CalendarFiltersState, TaskWithRelations } from './types'
 
@@ -45,6 +46,11 @@ export default function CalendarPage({
     priorities: [],
   })
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
+  const [newTaskDraft, setNewTaskDraft] = useState<{
+    date: Date
+    dueTime?: string
+    endTime?: string
+  } | null>(null)
   const [monthTasks, setMonthTasks] = useState(initialMonthTasks)
   const [weekTasks, setWeekTasks] = useState<{ [date: string]: TaskWithRelations[] }>({})
   const [dayTasks, setDayTasks] = useState<TaskWithRelations[]>([])
@@ -198,6 +204,22 @@ export default function CalendarPage({
     setSelectedTaskId(null)
   }, [])
 
+  const handleNewTaskFromDate = useCallback((date: Date) => {
+    setNewTaskDraft({ date })
+  }, [])
+
+  const handleNewTaskFromTime = useCallback((date: Date, dueTime: string, endTime: string) => {
+    setNewTaskDraft({ date, dueTime, endTime })
+  }, [])
+
+  const handleNewTaskModalClose = useCallback(() => {
+    setNewTaskDraft(null)
+  }, [])
+
+  const handleNewTaskCreated = useCallback(() => {
+    refreshCurrentView(focusDate, filters)
+  }, [focusDate, filters, refreshCurrentView])
+
   const weekStart = getWeekDays(focusDate)[0]
   const weekEnd = addDays(weekStart, 6)
   const monthLabel = `${focusDate.getFullYear()} 年 ${focusDate.getMonth() + 1} 月`
@@ -304,6 +326,7 @@ export default function CalendarPage({
               month={focusDate.getMonth()}
               focusDate={focusDate}
               onDateClick={handleDateClick}
+              onDateDoubleClick={handleNewTaskFromDate}
               onTaskClick={handleTaskClick}
               onTaskUpdate={handleTaskUpdate}
               onMonthChange={handleMonthChange}
@@ -317,6 +340,7 @@ export default function CalendarPage({
               onDateClick={handleDateClick}
               onTaskClick={handleTaskClick}
               onTaskTimeUpdate={handleTaskTimeUpdate}
+              onNewTask={handleNewTaskFromTime}
             />
           )}
           {viewReady && view === 'day' && (
@@ -328,6 +352,7 @@ export default function CalendarPage({
               onNextDay={handleNextDay}
               onToday={handleToday}
               onTaskTimeUpdate={handleTaskTimeUpdate}
+              onNewTask={handleNewTaskFromTime}
             />
           )}
           {isLoading && <p className="text-xs text-gray-400 mt-2">載入中...</p>}
@@ -342,6 +367,17 @@ export default function CalendarPage({
           onClose={handleModalClose}
           onUpdate={() => refreshCurrentView(focusDate, filters)}
           variant="modal"
+        />
+      )}
+
+      {newTaskDraft && (
+        <NewTaskModal
+          initialDate={newTaskDraft.date}
+          initialDueTime={newTaskDraft.dueTime}
+          initialEndTime={newTaskDraft.endTime}
+          lists={initialLists}
+          onClose={handleNewTaskModalClose}
+          onCreated={handleNewTaskCreated}
         />
       )}
     </div>

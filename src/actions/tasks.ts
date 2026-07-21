@@ -17,7 +17,10 @@ export async function createTask(
   listId?: number | null,
   note?: string,
   dueDate?: Date,
-  priority?: string
+  priority?: string,
+  dueTime?: string | null,
+  endTime?: string | null,
+  allDay?: boolean
 ) {
   try {
     const user = await requireAuth()
@@ -34,6 +37,9 @@ export async function createTask(
         dueDate: dueDate || null,
         priority: priority || 'none',
         listId: listId || null,
+        dueTime: dueTime || null,
+        endTime: endTime || null,
+        allDay: allDay ?? false,
       },
       include: {
         tags: { include: { tag: true } },

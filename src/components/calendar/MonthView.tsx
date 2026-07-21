@@ -10,6 +10,7 @@ interface MonthViewProps {
   month: number
   focusDate: Date
   onDateClick: (date: Date) => void
+  onDateDoubleClick?: (date: Date) => void
   onTaskClick: (taskId: number) => void
   onTaskUpdate?: (taskId: number, newDate: string) => Promise<boolean>
   onMonthChange?: (year: number, month: number) => void
@@ -24,6 +25,7 @@ export default function MonthView({
   month,
   focusDate,
   onDateClick,
+  onDateDoubleClick,
   onTaskClick,
   onTaskUpdate,
   onMonthChange,
@@ -144,6 +146,7 @@ export default function MonthView({
                       <div
                         key={dateStr}
                         onClick={() => onDateClick(date)}
+                        onDoubleClick={() => onDateDoubleClick?.(date)}
                         onDragOver={handleDateDragOver}
                         onDragEnter={(e) => handleDateDragEnter(e, dateStr)}
                         onDragLeave={handleDateDragLeave}
