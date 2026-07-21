@@ -103,6 +103,14 @@ export default function MonthView({
       <div className="flex">
         <div className="w-12 border-r border-gray-200 bg-gray-50">
           <div className="px-2 py-2 text-center text-xs font-medium text-gray-500 border-b border-gray-200">週</div>
+          {weeks.map((week) => (
+            <div
+              key={`weeknum-${getWeekNumber(week[0])}`}
+              className="px-2 py-1.5 text-center text-xs font-medium text-gray-400 border-b border-gray-100 flex items-center justify-center min-h-[110px]"
+            >
+              {getWeekNumber(week[0])}
+            </div>
+          ))}
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-7 border-b border-gray-200">
@@ -121,7 +129,6 @@ export default function MonthView({
           <div>
             {weeks.map((week) => (
               <div key={`week-${getWeekNumber(week[0])}`} className="flex">
-                <div className="hidden" />
                 <div className="flex-1 grid grid-cols-7">
                   {week.map((date) => {
                     const dateStr = dateToString(date)
@@ -234,9 +241,6 @@ export default function MonthView({
                       </div>
                     )
                   })}
-                </div>
-                <div className="w-12 px-2 py-1.5 text-center text-xs font-medium text-gray-400 border-l border-b border-gray-100 flex items-center justify-center min-h-[110px] bg-gray-50">
-                  {getWeekNumber(week[0])}
                 </div>
               </div>
             ))}
