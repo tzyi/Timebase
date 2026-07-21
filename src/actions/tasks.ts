@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from './auth'
-import { getTodayRange, getNext7DaysEnd } from '@/lib/date'
+import { getTodayRange, getNext7DaysEnd, toDateInputValue } from '@/lib/date'
 
 export type TaskView =
   | 'today'
@@ -333,7 +333,7 @@ export async function getMonthTasks(
 
     const grouped = new Map<string, any[]>()
     tasks.forEach((task) => {
-      const dateStr = task.dueDate?.toISOString().split('T')[0] || ''
+      const dateStr = task.dueDate ? toDateInputValue(task.dueDate) : ''
       if (!grouped.has(dateStr)) {
         grouped.set(dateStr, [])
       }
@@ -394,7 +394,7 @@ export async function getWeekTasks(
 
     const grouped = new Map<string, any[]>()
     tasks.forEach((task) => {
-      const dateStr = task.dueDate?.toISOString().split('T')[0] || ''
+      const dateStr = task.dueDate ? toDateInputValue(task.dueDate) : ''
       if (!grouped.has(dateStr)) {
         grouped.set(dateStr, [])
       }

@@ -71,7 +71,7 @@ export default function CalendarPage({
   }, [])
 
   const handleTaskUpdate = useCallback(async (taskId: number, newDateStr: string) => {
-    const newDate = new Date(newDateStr)
+    const newDate = new Date(`${newDateStr}T00:00:00`)
     const result = await updateTask(taskId, { dueDate: newDate })
     if (result.success) {
       await refreshMonthTasks(focusDate, filters)

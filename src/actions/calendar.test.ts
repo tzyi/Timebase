@@ -52,7 +52,7 @@ export function testGetMonthTasksLogic() {
   // Simulate grouping by date
   const grouped: { [key: string]: MockTask[] } = {};
   mockTasks.forEach((task) => {
-    const dateStr = task.dueDate.toISOString().split('T')[0];
+    const dateStr = `${task.dueDate.getFullYear()}-${String(task.dueDate.getMonth() + 1).padStart(2, '0')}-${String(task.dueDate.getDate()).padStart(2, '0')}`;
     if (!grouped[dateStr]) grouped[dateStr] = [];
     grouped[dateStr].push(task);
   });

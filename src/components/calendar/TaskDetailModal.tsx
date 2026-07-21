@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { TaskWithRelations } from './types'
 import { deleteTask, updateTask } from '@/actions/tasks'
+import { toDateInputValue } from '@/lib/date'
 import { List, Tag } from '@prisma/client'
 
 interface TaskDetailModalProps {
@@ -40,7 +41,7 @@ export default function TaskDetailModal({
     if (task) {
       setTitle(task.title || '')
       setNote(task.note || '')
-      setDueDate(task.dueDate ? task.dueDate.toISOString().split('T')[0] : '')
+      setDueDate(task.dueDate ? toDateInputValue(new Date(task.dueDate)) : '')
       setDueTime(task.dueTime || '')
       setEndTime(task.endTime || '')
       setAllDay(task.allDay || false)
@@ -70,7 +71,7 @@ export default function TaskDetailModal({
       const result = await updateTask(task.id, {
         title: title.trim(),
         note,
-        dueDate: dueDate ? new Date(dueDate) : null,
+        dueDate: dueDate ? new Date(`${dueDate}T00:00:00`) : null,
         dueTime: dueTime || null,
         endTime: endTime || null,
         allDay,
