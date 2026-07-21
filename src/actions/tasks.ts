@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from './auth'
 import { getTodayRange, getNext7DaysEnd, toDateInputValue } from '@/lib/date'
+import { sortDayTasks } from '@/lib/taskTimeClassification'
 
 export type TaskView =
   | 'today'
@@ -298,7 +299,10 @@ export async function getTasksForView(view: TaskView) {
 
     const tasks = await prisma.task.findMany({
       where,
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      orderBy:
+        view === 'next7days'
+          ? [{ dueDate: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }]
+          : [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
       include: {
         tags: { include: { tag: true } },
         list: true,
@@ -347,7 +351,7 @@ export async function getTodayViewGrouped() {
       }),
     ])
 
-    return { success: true, data: { overdue, today: todayTasks } }
+    return { success: true, data: { overdue, today: sortDayTasks(todayTasks) } }
   } catch (error) {
     console.error('查詢今天視圖錯誤:', error)
     return { success: false, error: '查詢今天視圖失敗' }
