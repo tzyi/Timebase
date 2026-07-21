@@ -90,6 +90,7 @@ export default function BoardCard({ task, onSelectTask, onToggleComplete }: Boar
               className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 font-medium' : 'text-blue-600'}`}
             >
               {formatDueDate(task.dueDate)}
+              {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}
             </span>
           )}
         </div>

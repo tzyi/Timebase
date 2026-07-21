@@ -67,6 +67,7 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
           className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 font-medium' : 'text-blue-600'}`}
         >
           {formatDueDate(task.dueDate)}
+          {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}
         </span>
       )}
 
