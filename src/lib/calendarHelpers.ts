@@ -98,3 +98,66 @@ export function formatDate(date: Date): string {
     day: 'numeric',
   });
 }
+
+const COLOR_MAP: { [key: string]: string } = {
+  red: 'bg-red-100',
+  orange: 'bg-orange-100',
+  yellow: 'bg-yellow-100',
+  green: 'bg-green-100',
+  blue: 'bg-blue-100',
+  indigo: 'bg-indigo-100',
+  purple: 'bg-purple-100',
+  pink: 'bg-pink-100',
+  gray: 'bg-gray-100',
+};
+
+const TEXT_COLOR_MAP: { [key: string]: string } = {
+  red: 'text-red-700',
+  orange: 'text-orange-700',
+  yellow: 'text-yellow-700',
+  green: 'text-green-700',
+  blue: 'text-blue-700',
+  indigo: 'text-indigo-700',
+  purple: 'text-purple-700',
+  pink: 'text-pink-700',
+  gray: 'text-gray-700',
+};
+
+interface TaskForColor {
+  completedAt?: Date | null;
+  dueDate?: Date | null;
+  list?: { color: string } | null;
+  status?: string;
+}
+
+export function getTaskBackgroundColor(task: TaskForColor): string {
+  if (task.completedAt || task.status === 'done') {
+    return 'bg-gray-200';
+  }
+
+  if (task.dueDate && new Date(task.dueDate) < new Date()) {
+    return 'bg-gray-200';
+  }
+
+  if (task.list && task.list.color) {
+    return COLOR_MAP[task.list.color] || 'bg-blue-100';
+  }
+
+  return 'bg-blue-100';
+}
+
+export function getTaskTextColor(task: TaskForColor): string {
+  if (task.completedAt || task.status === 'done') {
+    return 'text-gray-500';
+  }
+
+  if (task.dueDate && new Date(task.dueDate) < new Date()) {
+    return 'text-gray-600';
+  }
+
+  if (task.list && task.list.color) {
+    return TEXT_COLOR_MAP[task.list.color] || 'text-blue-700';
+  }
+
+  return 'text-blue-700';
+}

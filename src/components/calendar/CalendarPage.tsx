@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { List, Tag } from '@prisma/client'
-import { getMonthTasks, CalendarFilters as ServerCalendarFilters } from '@/actions/tasks'
+import { getMonthTasks, updateTask, CalendarFilters as ServerCalendarFilters } from '@/actions/tasks'
 import { getToday } from '@/lib/calendarHelpers'
 import FilterBar from './FilterBar'
 import MonthView from './MonthView'
@@ -68,6 +68,21 @@ export default function CalendarPage({
     setSelectedTaskId(taskId)
   }, [])
 
+  const handleTaskUpdate = useCallback(async (taskId: number, newDateStr: string) => {
+    const newDate = new Date(newDateStr)
+    const result = await updateTask(taskId, { dueDate: newDate })
+    if (result.success) {
+      await refreshMonthTasks(focusDate, filters)
+      return true
+    }
+    return false
+  }, [focusDate, filters, refreshMonthTasks])
+
+  const handleMonthChange = useCallback((newYear: number, newMonth: number) => {
+    const newDate = new Date(newYear, newMonth, 1)
+    setFocusDate(newDate)
+  }, [])
+
   const monthLabel = `${focusDate.getFullYear()} 年 ${focusDate.getMonth() + 1} 月`
 
   return (
@@ -116,6 +131,8 @@ export default function CalendarPage({
               focusDate={focusDate}
               onDateClick={handleDateClick}
               onTaskClick={handleTaskClick}
+              onTaskUpdate={handleTaskUpdate}
+              onMonthChange={handleMonthChange}
             />
           )}
           {view === 'week' && (
