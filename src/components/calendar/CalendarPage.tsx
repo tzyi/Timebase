@@ -237,21 +237,31 @@ export default function CalendarPage({
             <h1 className="text-lg font-semibold text-gray-900">{headerLabel}</h1>
           </div>
 
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            {VIEW_LABELS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setView(value)}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                  view === value
-                    ? 'bg-white text-blue-600 shadow-sm font-medium'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleToday}
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100"
+            >
+              今天
+            </button>
+
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              {VIEW_LABELS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setView(value)}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    view === value
+                      ? 'bg-white text-blue-600 shadow-sm font-medium'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
