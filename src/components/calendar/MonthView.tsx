@@ -15,7 +15,7 @@ interface MonthViewProps {
   onMonthChange?: (year: number, month: number) => void
 }
 
-const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六']
+const WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日']
 const MAX_VISIBLE_TASKS = 4
 
 export default function MonthView({
@@ -118,7 +118,7 @@ export default function MonthView({
               <div
                 key={label}
                 className={`px-2 py-2 text-center text-xs font-medium ${
-                  i === 0 || i === 6 ? 'text-red-400' : 'text-gray-500'
+                  i === 5 || i === 6 ? 'text-red-400' : 'text-gray-500'
                 }`}
               >
                 {label}

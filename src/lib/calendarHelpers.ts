@@ -2,12 +2,13 @@ export function getMonthDays(year: number, month: number): Date[][] {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startDate = new Date(firstDay);
-  startDate.setDate(startDate.getDate() - firstDay.getDay());
+  const firstDayOffset = (firstDay.getDay() + 6) % 7;
+  startDate.setDate(startDate.getDate() - firstDayOffset);
 
   const weeks: Date[][] = [];
   let currentDate = new Date(startDate);
 
-  while (currentDate <= lastDay || currentDate.getDay() !== 0) {
+  while (currentDate <= lastDay || currentDate.getDay() !== 1) {
     const week: Date[] = [];
     for (let i = 0; i < 7; i++) {
       week.push(new Date(currentDate));
