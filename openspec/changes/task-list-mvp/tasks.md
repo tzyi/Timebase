@@ -14,7 +14,7 @@
 
 ## 3. 使用者驗證 (user-auth)
 
-- [ ] 3.1 實作註冊 Server Action：Email 唯一性檢查、bcrypt 雜湊密碼、建立 User
+- [x] 3.1 實作註冊 Server Action：Email 唯一性檢查、bcrypt 雜湊密碼、建立 User
 - [ ] 3.2 實作註冊頁面 UI（`app/(auth)/register`）
 - [ ] 3.3 設定 Auth.js Credentials Provider，串接登入驗證邏輯
 - [ ] 3.4 實作登入頁面 UI（`app/(auth)/login`）
