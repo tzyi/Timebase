@@ -56,6 +56,8 @@ export async function updateTask(
     note?: string
     dueDate?: Date | null
     dueTime?: string | null
+    endTime?: string | null
+    allDay?: boolean
     priority?: string
     listId?: number | null
   }
@@ -75,6 +77,8 @@ export async function updateTask(
         note: data.note !== undefined ? data.note : undefined,
         dueDate: data.dueDate !== undefined ? data.dueDate : undefined,
         dueTime: data.dueTime !== undefined ? data.dueTime : undefined,
+        endTime: data.endTime !== undefined ? data.endTime : undefined,
+        allDay: data.allDay !== undefined ? data.allDay : undefined,
         priority: data.priority,
         listId: data.listId !== undefined ? data.listId : undefined,
       },
@@ -280,5 +284,178 @@ export async function getTodayViewGrouped() {
   } catch (error) {
     console.error('查詢今天視圖錯誤:', error)
     return { success: false, error: '查詢今天視圖失敗' }
+  }
+}
+
+export interface CalendarFilters {
+  listIds?: number[]
+  tagIds?: number[]
+  priorities?: string[]
+}
+
+export async function getMonthTasks(
+  year: number,
+  month: number,
+  filters?: CalendarFilters
+) {
+  try {
+    const user = await requireAuth()
+
+    const startDate = new Date(year, month, 1)
+    const endDate = new Date(year, month + 1, 0)
+
+    const where: any = {
+      userId: user.id,
+      dueDate: { gte: startDate, lte: endDate },
+    }
+
+    if (filters?.listIds && filters.listIds.length > 0) {
+      where.listId = { in: filters.listIds }
+    }
+
+    if (filters?.priorities && filters.priorities.length > 0) {
+      where.priority = { in: filters.priorities }
+    }
+
+    if (filters?.tagIds && filters.tagIds.length > 0) {
+      where.tags = { some: { tagId: { in: filters.tagIds } } }
+    }
+
+    const tasks = await prisma.task.findMany({
+      where,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      include: {
+        tags: { include: { tag: true } },
+        list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
+      },
+    })
+
+    const grouped = new Map<string, any[]>()
+    tasks.forEach((task) => {
+      const dateStr = task.dueDate?.toISOString().split('T')[0] || ''
+      if (!grouped.has(dateStr)) {
+        grouped.set(dateStr, [])
+      }
+      grouped.get(dateStr)!.push(task)
+    })
+
+    const result: { [key: string]: any[] } = {}
+    grouped.forEach((tasks, dateStr) => {
+      result[dateStr] = tasks.sort((a, b) => {
+        const priorityOrder: { [key: string]: number } = { high: 0, medium: 1, low: 2, none: 3 }
+        return (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3)
+      })
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error('查詢月份任務錯誤:', error)
+    return { success: false, error: '查詢月份任務失敗' }
+  }
+}
+
+export async function getWeekTasks(
+  startDate: Date,
+  filters?: CalendarFilters
+) {
+  try {
+    const user = await requireAuth()
+
+    const endDate = new Date(startDate)
+    endDate.setDate(endDate.getDate() + 7)
+
+    const where: any = {
+      userId: user.id,
+      dueDate: { gte: startDate, lt: endDate },
+    }
+
+    if (filters?.listIds && filters.listIds.length > 0) {
+      where.listId = { in: filters.listIds }
+    }
+
+    if (filters?.priorities && filters.priorities.length > 0) {
+      where.priority = { in: filters.priorities }
+    }
+
+    if (filters?.tagIds && filters.tagIds.length > 0) {
+      where.tags = { some: { tagId: { in: filters.tagIds } } }
+    }
+
+    const tasks = await prisma.task.findMany({
+      where,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      include: {
+        tags: { include: { tag: true } },
+        list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
+      },
+    })
+
+    const grouped = new Map<string, any[]>()
+    tasks.forEach((task) => {
+      const dateStr = task.dueDate?.toISOString().split('T')[0] || ''
+      if (!grouped.has(dateStr)) {
+        grouped.set(dateStr, [])
+      }
+      grouped.get(dateStr)!.push(task)
+    })
+
+    const result: { [key: string]: any[] } = {}
+    grouped.forEach((tasks, dateStr) => {
+      result[dateStr] = tasks
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error('查詢週任務錯誤:', error)
+    return { success: false, error: '查詢週任務失敗' }
+  }
+}
+
+export async function getDayTasks(
+  date: Date,
+  filters?: CalendarFilters
+) {
+  try {
+    const user = await requireAuth()
+
+    const dayStart = new Date(date)
+    dayStart.setHours(0, 0, 0, 0)
+
+    const dayEnd = new Date(date)
+    dayEnd.setHours(23, 59, 59, 999)
+
+    const where: any = {
+      userId: user.id,
+      dueDate: { gte: dayStart, lte: dayEnd },
+    }
+
+    if (filters?.listIds && filters.listIds.length > 0) {
+      where.listId = { in: filters.listIds }
+    }
+
+    if (filters?.priorities && filters.priorities.length > 0) {
+      where.priority = { in: filters.priorities }
+    }
+
+    if (filters?.tagIds && filters.tagIds.length > 0) {
+      where.tags = { some: { tagId: { in: filters.tagIds } } }
+    }
+
+    const tasks = await prisma.task.findMany({
+      where,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      include: {
+        tags: { include: { tag: true } },
+        list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
+      },
+    })
+
+    return { success: true, data: tasks }
+  } catch (error) {
+    console.error('查詢日任務錯誤:', error)
+    return { success: false, error: '查詢日任務失敗' }
   }
 }

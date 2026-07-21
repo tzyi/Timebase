@@ -1,44 +1,44 @@
 ## 0. 架構和資料庫
 
-- [ ] 0.1 更新 Prisma 架構：向 Task 模型新增 `endTime: String?` 欄位
-- [ ] 0.2 更新 Prisma 架構：向 Task 模型新增 `allDay: Boolean @default(false)` 欄位
-- [ ] 0.3 執行 `npx prisma migrate dev --name add_task_time_fields`
-- [ ] 0.4 驗證在 `prisma/migrations/` 中建立的遷移檔案
+- [x] 0.1 更新 Prisma 架構：向 Task 模型新增 `endTime: String?` 欄位
+- [x] 0.2 更新 Prisma 架構：向 Task 模型新增 `allDay: Boolean @default(false)` 欄位
+- [x] 0.3 執行 `npx prisma migrate dev --name add_task_time_fields`
+- [x] 0.4 驗證在 `prisma/migrations/` 中建立的遷移檔案
 
 ## 1. 實用程式庫
 
-- [ ] 1.1 使用日期實用函數建立 `src/lib/calendarHelpers.ts`：
+- [x] 1.1 使用日期實用函數建立 `src/lib/calendarHelpers.ts`：
   - `getMonthDays(year, month)` — 傳回 2D 日期陣列
   - `getWeekDays(date)` — 傳回 7 個日期的陣列 (Mon-Sun)
   - `getWeekNumber(date)` — 傳回 ISO 週數
   - `formatTime(time: string)` — 將「08:30」轉換為顯示格式
   - `timeToMinutes(time: string)` — 將「08:30」轉換為 510
-- [ ] 1.2 建立 `src/lib/taskTimeClassification.ts`：
+- [x] 1.2 建立 `src/lib/taskTimeClassification.ts`：
   - `enum TaskTimeType { NO_TIME, ALL_DAY, TIMED }`
   - `classifyTaskTime(task)` — 傳回任務的時間類型
   - `sortDayTasks(tasks)` — 按以下方式排序：ALL_DAY → NO_TIME → TIMED（依時間）
-- [ ] 1.3 建立 `src/lib/taskLayout.ts`（針對週/日重疊）：
+- [x] 1.3 建立 `src/lib/taskLayout.ts`（針對週/日重疊）：
   - `calculateTaskLayout(tasks, dayStart, dayEnd)` — 傳回布局陣列
   - 每個布局包括：`{ taskId, column, columnCount, top, height, left }`
-- [ ] 1.4 使用範例資料進行單元測試實用程式
+- [x] 1.4 使用範例資料進行單元測試實用程式
 
 ## 2. Server Actions
 
-- [ ] 2.1 更新 `src/actions/tasks.ts`：
+- [x] 2.1 更新 `src/actions/tasks.ts`：
   - 修改 `updateTask()` 簽名以接受 `endTime` 和 `allDay` 參數
   - 更新 Prisma 更新以設定這些欄位
-- [ ] 2.2 新增 `getMonthTasks()` Server Action：
+- [x] 2.2 新增 `getMonthTasks()` Server Action：
   - 接受：年、月、過濾條件（listIds、tagIds、priorities）
   - 傳回：Map<date, Task[]> 或分組物件
   - 按 `userId`、`dueDate`（月份範圍）和已套用過濾條件進行篩選
-- [ ] 2.3 新增 `getWeekTasks()` Server Action：
+- [x] 2.3 新增 `getWeekTasks()` Server Action：
   - 接受：startDate (Monday)、過濾條件
   - 傳回：7 天週 Map<date, Task[]>
-- [ ] 2.4 新增 `getDayTasks()` Server Action：
+- [x] 2.4 新增 `getDayTasks()` Server Action：
   - 接受：日期、過濾條件
   - 傳回：按 `sortDayTasks()` 邏輯排序的 Task[]
   - 包括所有任務詳細資訊（標籤、清單、子任務（如果需要））
-- [ ] 2.5 使用範例資料測試所有三個 Server Actions
+- [x] 2.5 使用範例資料測試所有三個 Server Actions
 
 ## 3. 日曆頁面框架
 

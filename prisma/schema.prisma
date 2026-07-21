@@ -48,6 +48,8 @@ model Task {
   note        String  @default("")
   dueDate     DateTime?
   dueTime     String?
+  endTime     String?
+  allDay      Boolean @default(false)
   priority    String  @default("none")
   status      String  @default("todo")
   completedAt DateTime?
