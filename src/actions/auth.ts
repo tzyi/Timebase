@@ -1,7 +1,9 @@
 'use server'
 
 import { hash } from 'bcrypt'
-import prisma from '@/lib/prisma'
+import { signOut as authSignOut } from '@/auth'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
 
 export async function registerUser(email: string, password: string, name?: string) {
   try {
@@ -52,4 +54,16 @@ export async function registerUser(email: string, password: string, name?: strin
       error: '註冊失敗，請稍後再試',
     }
   }
+}
+
+export async function logout() {
+  await authSignOut({ redirectTo: '/login' })
+}
+
+export async function requireAuth() {
+  const session = await auth()
+  if (!session) {
+    throw new Error('Unauthorized: User is not authenticated')
+  }
+  return session.user
 }

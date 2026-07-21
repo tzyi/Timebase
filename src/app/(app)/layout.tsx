@@ -1,7 +1,16 @@
-export default function AppLayout({
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const session = await auth()
+
+  if (!session) {
+    redirect('/login')
+  }
+
+  return <>{children}</>
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,8 +23,20 @@ export default function LoginPage() {
 
     setIsLoading(true)
     try {
-      // 登入邏輯將在 3.3 實作
-      setError('登入功能開發中')
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError('電子郵件或密碼不正確')
+      } else if (result?.ok) {
+        router.push('/app/tasks')
+      }
+    } catch (err) {
+      setError('登入失敗，請稍後再試')
+      console.error('登入錯誤:', err)
     } finally {
       setIsLoading(false)
     }
