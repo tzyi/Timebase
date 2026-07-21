@@ -126,6 +126,26 @@ export default function CalendarPage({
     return false
   }, [focusDate, filters, refreshMonthTasks])
 
+  const handleTaskTimeUpdate = useCallback(async (
+    taskId: number,
+    dateStr: string,
+    newDueTime: string,
+    newEndTime: string
+  ) => {
+    const newDate = new Date(`${dateStr}T00:00:00`)
+    const result = await updateTask(taskId, {
+      dueDate: newDate,
+      dueTime: newDueTime,
+      endTime: newEndTime,
+    })
+    if (result.success) {
+      if (view === 'week') await refreshWeekTasks(focusDate, filters)
+      if (view === 'day') await refreshDayTasks(focusDate, filters)
+      return true
+    }
+    return false
+  }, [view, focusDate, filters, refreshWeekTasks, refreshDayTasks])
+
   const handleMonthChange = useCallback((newYear: number, newMonth: number) => {
     const newDate = new Date(newYear, newMonth, 1)
     setFocusDate(newDate)
@@ -257,6 +277,7 @@ export default function CalendarPage({
               focusDate={focusDate}
               onDateClick={handleDateClick}
               onTaskClick={handleTaskClick}
+              onTaskTimeUpdate={handleTaskTimeUpdate}
             />
           )}
           {view === 'day' && (
@@ -267,6 +288,7 @@ export default function CalendarPage({
               onPrevDay={handlePrevDay}
               onNextDay={handleNextDay}
               onToday={handleToday}
+              onTaskTimeUpdate={handleTaskTimeUpdate}
             />
           )}
           {isLoading && <p className="text-xs text-gray-400 mt-2">載入中...</p>}

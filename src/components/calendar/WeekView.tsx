@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   getWeekDays,
   dateToString,
@@ -9,6 +10,8 @@ import {
   getTaskBackgroundColor,
   getTaskTextColor,
   formatTime,
+  timeToMinutes,
+  minutesToTime,
 } from '@/lib/calendarHelpers'
 import { classifyTaskTime, TaskTimeType } from '@/lib/taskTimeClassification'
 import { calculateTaskLayout } from '@/lib/taskLayout'
@@ -22,10 +25,19 @@ interface WeekViewProps {
   focusDate: Date
   onDateClick: (date: Date) => void
   onTaskClick: (taskId: number) => void
+  onTaskTimeUpdate?: (
+    taskId: number,
+    dateStr: string,
+    newDueTime: string,
+    newEndTime: string
+  ) => Promise<boolean>
 }
 
 const HOUR_HEIGHT = 60
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
+const SNAP_MINUTES = 15
+const MIN_DURATION = 15
+const DAY_MINUTES = 24 * 60
 
 export default function WeekView({
   weekTasks,
@@ -33,9 +45,64 @@ export default function WeekView({
   focusDate,
   onDateClick,
   onTaskClick,
+  onTaskTimeUpdate,
 }: WeekViewProps) {
   const days = getWeekDays(weekStart)
   const today = new Date()
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null)
+  const [dragDuration, setDragDuration] = useState<number>(MIN_DURATION)
+  const [dragOverInfo, setDragOverInfo] = useState<{ dateStr: string; startMinutes: number } | null>(null)
+
+  const handleTaskDragStart = (e: React.DragEvent, task: TaskWithRelations) => {
+    const isCompleted = task.status === 'done' || !!task.completedAt
+    if (isCompleted) {
+      e.preventDefault()
+      return
+    }
+    const start = timeToMinutes(task.dueTime || '00:00')
+    const end = timeToMinutes(task.endTime || '00:00')
+    setDraggedTaskId(task.id)
+    setDragDuration(Math.max(end - start, MIN_DURATION))
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleTaskDragEnd = () => {
+    setDraggedTaskId(null)
+    setDragOverInfo(null)
+  }
+
+  const handleColumnDragOver = (e: React.DragEvent, dateStr: string) => {
+    if (draggedTaskId === null) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    const rect = e.currentTarget.getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
+    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
+    const maxStart = Math.max(DAY_MINUTES - dragDuration, 0)
+    const clamped = Math.min(Math.max(snapped, 0), maxStart)
+    setDragOverInfo({ dateStr, startMinutes: clamped })
+  }
+
+  const handleColumnDrop = async (e: React.DragEvent, dateStr: string) => {
+    e.preventDefault()
+    const taskId = draggedTaskId
+    const info = dragOverInfo
+    setDraggedTaskId(null)
+    setDragOverInfo(null)
+
+    if (taskId === null || info === null || info.dateStr !== dateStr) return
+
+    const newDueTime = minutesToTime(info.startMinutes)
+    const newEndTime = minutesToTime(Math.min(info.startMinutes + dragDuration, DAY_MINUTES))
+
+    if (onTaskTimeUpdate) {
+      const success = await onTaskTimeUpdate(taskId, dateStr, newDueTime, newEndTime)
+      if (!success) {
+        console.error('Failed to update task time')
+      }
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm flex flex-col h-full">
@@ -138,6 +205,8 @@ export default function WeekView({
                   key={dateStr}
                   className="relative border-r border-gray-100 last:border-r-0"
                   style={{ height: HOUR_HEIGHT * 24 }}
+                  onDragOver={(e) => handleColumnDragOver(e, dateStr)}
+                  onDrop={(e) => handleColumnDrop(e, dateStr)}
                 >
                   {HOURS.map((hour) => (
                     <div
@@ -156,6 +225,9 @@ export default function WeekView({
                       <button
                         key={task.id}
                         type="button"
+                        draggable={!isCompleted}
+                        onDragStart={(e) => handleTaskDragStart(e, task)}
+                        onDragEnd={handleTaskDragEnd}
                         onClick={() => onTaskClick(task.id)}
                         style={{
                           position: 'absolute',
@@ -165,8 +237,8 @@ export default function WeekView({
                           width: `${100 / layout.columnCount}%`,
                         }}
                         className={`overflow-hidden text-left text-[11px] px-1 py-0.5 rounded border border-black/5 transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
-                          isCompleted ? 'line-through opacity-70' : ''
-                        }`}
+                          isCompleted ? 'line-through opacity-70 cursor-not-allowed' : 'cursor-grab'
+                        } ${draggedTaskId === task.id ? 'opacity-40' : ''}`}
                       >
                         <div className="font-medium truncate">{task.title}</div>
                         {task.dueTime && (
@@ -178,6 +250,17 @@ export default function WeekView({
                       </button>
                     )
                   })}
+                  {dragOverInfo?.dateStr === dateStr && (
+                    <div
+                      className="absolute left-0 right-0 z-20 pointer-events-none"
+                      style={{ top: dragOverInfo.startMinutes }}
+                    >
+                      <div className="border-t-2 border-blue-500" />
+                      <span className="inline-block -translate-y-1/2 ml-1 text-[10px] text-white bg-blue-500 px-1 rounded shadow">
+                        {minutesToTime(dragOverInfo.startMinutes)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )
             })}

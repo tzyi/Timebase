@@ -1,6 +1,16 @@
 'use client'
 
-import { isSameDay, getTaskBackgroundColor, getTaskTextColor, formatTime, formatDate } from '@/lib/calendarHelpers'
+import { useState } from 'react'
+import {
+  isSameDay,
+  getTaskBackgroundColor,
+  getTaskTextColor,
+  formatTime,
+  formatDate,
+  dateToString,
+  timeToMinutes,
+  minutesToTime,
+} from '@/lib/calendarHelpers'
 import { classifyTaskTime, TaskTimeType } from '@/lib/taskTimeClassification'
 import { calculateTaskLayout } from '@/lib/taskLayout'
 import { TaskWithRelations } from './types'
@@ -13,10 +23,19 @@ interface DayViewProps {
   onPrevDay: () => void
   onNextDay: () => void
   onToday: () => void
+  onTaskTimeUpdate?: (
+    taskId: number,
+    dateStr: string,
+    newDueTime: string,
+    newEndTime: string
+  ) => Promise<boolean>
 }
 
 const HOUR_HEIGHT = 60
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
+const SNAP_MINUTES = 15
+const MIN_DURATION = 15
+const DAY_MINUTES = 24 * 60
 
 export default function DayView({
   dayTasks,
@@ -25,12 +44,66 @@ export default function DayView({
   onPrevDay,
   onNextDay,
   onToday,
+  onTaskTimeUpdate,
 }: DayViewProps) {
   const today = new Date()
   const isToday = isSameDay(focusDate, today)
   const untimedTasks = dayTasks.filter((t) => classifyTaskTime(t as any) !== TaskTimeType.TIMED)
   const timedTasks = dayTasks.filter((t) => classifyTaskTime(t as any) === TaskTimeType.TIMED)
   const layouts = calculateTaskLayout(timedTasks as any)
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null)
+  const [dragDuration, setDragDuration] = useState<number>(MIN_DURATION)
+  const [dragOverMinutes, setDragOverMinutes] = useState<number | null>(null)
+
+  const handleTaskDragStart = (e: React.DragEvent, task: TaskWithRelations) => {
+    const isCompleted = task.status === 'done' || !!task.completedAt
+    if (isCompleted) {
+      e.preventDefault()
+      return
+    }
+    const start = timeToMinutes(task.dueTime || '00:00')
+    const end = timeToMinutes(task.endTime || '00:00')
+    setDraggedTaskId(task.id)
+    setDragDuration(Math.max(end - start, MIN_DURATION))
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleTaskDragEnd = () => {
+    setDraggedTaskId(null)
+    setDragOverMinutes(null)
+  }
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    if (draggedTaskId === null) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    const rect = e.currentTarget.getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
+    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
+    const maxStart = Math.max(DAY_MINUTES - dragDuration, 0)
+    setDragOverMinutes(Math.min(Math.max(snapped, 0), maxStart))
+  }
+
+  const handleColumnDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    const taskId = draggedTaskId
+    const startMinutes = dragOverMinutes
+    setDraggedTaskId(null)
+    setDragOverMinutes(null)
+
+    if (taskId === null || startMinutes === null) return
+
+    const newDueTime = minutesToTime(startMinutes)
+    const newEndTime = minutesToTime(Math.min(startMinutes + dragDuration, DAY_MINUTES))
+
+    if (onTaskTimeUpdate) {
+      const success = await onTaskTimeUpdate(taskId, dateToString(focusDate), newDueTime, newEndTime)
+      if (!success) {
+        console.error('Failed to update task time')
+      }
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm flex flex-col h-full">
@@ -101,7 +174,12 @@ export default function DayView({
               </div>
             ))}
           </div>
-          <div className="flex-1 relative border-l border-gray-100" style={{ height: HOUR_HEIGHT * 24 }}>
+          <div
+            className="flex-1 relative border-l border-gray-100"
+            style={{ height: HOUR_HEIGHT * 24 }}
+            onDragOver={handleColumnDragOver}
+            onDrop={handleColumnDrop}
+          >
             {HOURS.map((hour) => (
               <div
                 key={hour}
@@ -119,6 +197,9 @@ export default function DayView({
                 <button
                   key={task.id}
                   type="button"
+                  draggable={!isCompleted}
+                  onDragStart={(e) => handleTaskDragStart(e, task)}
+                  onDragEnd={handleTaskDragEnd}
                   onClick={() => onTaskClick(task.id)}
                   style={{
                     position: 'absolute',
@@ -128,8 +209,8 @@ export default function DayView({
                     width: `${100 / layout.columnCount}%`,
                   }}
                   className={`overflow-hidden text-left text-xs px-2 py-1 rounded border border-black/5 transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
-                    isCompleted ? 'line-through opacity-70' : ''
-                  }`}
+                    isCompleted ? 'line-through opacity-70 cursor-not-allowed' : 'cursor-grab'
+                  } ${draggedTaskId === task.id ? 'opacity-40' : ''}`}
                 >
                   <div className="font-medium truncate">{task.title}</div>
                   {task.dueTime && task.endTime && (
@@ -140,6 +221,17 @@ export default function DayView({
                 </button>
               )
             })}
+            {dragOverMinutes !== null && (
+              <div
+                className="absolute left-0 right-0 z-20 pointer-events-none"
+                style={{ top: dragOverMinutes }}
+              >
+                <div className="border-t-2 border-blue-500" />
+                <span className="inline-block -translate-y-1/2 ml-1 text-[10px] text-white bg-blue-500 px-1 rounded shadow">
+                  {minutesToTime(dragOverMinutes)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
