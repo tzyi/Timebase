@@ -63,6 +63,7 @@ export default function TaskDetailPanel({
   const isResizingRef = useRef(false)
   const listPickerRef = useRef<HTMLDivElement>(null)
   const datePickerRef = useRef<HTMLDivElement>(null)
+  const dateInputRef = useRef<HTMLInputElement>(null)
   const tagPickerRef = useRef<HTMLDivElement>(null)
   const priorityPickerRef = useRef<HTMLDivElement>(null)
 
@@ -75,6 +76,18 @@ export default function TaskDetailPanel({
     setAssignedTagIds(new Set(task.tags.map((t) => t.tag.id)))
     setSubtasks(task.subtasks)
   }, [task])
+
+  useEffect(() => {
+    if (!showDatePicker) return
+    const input = dateInputRef.current
+    if (input && typeof input.showPicker === 'function') {
+      try {
+        input.showPicker()
+      } catch {
+        // 部分瀏覽器（如 Safari）不支援 showPicker，忽略即可，使用者仍可手動點擊輸入框
+      }
+    }
+  }, [showDatePicker])
 
   const handleResizeStart = useCallback(() => {
     isResizingRef.current = true
@@ -259,6 +272,7 @@ export default function TaskDetailPanel({
           {showDatePicker && (
             <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-2">
               <input
+                ref={dateInputRef}
                 type="date"
                 value={dueDate}
                 onChange={(e) => handleDueDateChange(e.target.value)}
