@@ -1,16 +1,16 @@
 ## 1. 專案骨架
 
-- [ ] 1.1 建立 Next.js 專案（App Router + TypeScript）
-- [ ] 1.2 安裝並設定 Prisma，指向 SQLite（`dev.db`）
-- [ ] 1.3 安裝並設定 Auth.js（Credentials Provider）與 bcrypt
-- [ ] 1.4 設定 Tailwind（或等效方案）作為版面/breakpoint 實作基礎
-- [ ] 1.5 建立基礎專案目錄：`app/(auth)`、`app/(app)/tasks`、`actions/`、`prisma/`
+- [x] 1.1 建立 Next.js 專案（App Router + TypeScript）
+- [x] 1.2 安裝並設定 Prisma，指向 SQLite（`dev.db`）
+- [x] 1.3 安裝並設定 Auth.js（Credentials Provider）與 bcrypt
+- [x] 1.4 設定 Tailwind（或等效方案）作為版面/breakpoint 實作基礎
+- [x] 1.5 建立基礎專案目錄：`app/(auth)`、`app/(app)/tasks`、`actions/`、`prisma/`
 
 ## 2. 資料模型與 Migration
 
-- [ ] 2.1 撰寫 `prisma/schema.prisma`：User、ListFolder、List、Task、Tag、TaskTag
-- [ ] 2.2 執行初始 migration，確認 SQLite 檔案與資料表建立成功
-- [ ] 2.3 建立 Prisma client 單例（避免開發模式下重複連線）
+- [x] 2.1 撰寫 `prisma/schema.prisma`：User、ListFolder、List、Task、Tag、TaskTag
+- [x] 2.2 執行初始 migration，確認 SQLite 檔案與資料表建立成功
+- [x] 2.3 建立 Prisma client 單例（避免開發模式下重複連線）
 
 ## 3. 使用者驗證 (user-auth)
 

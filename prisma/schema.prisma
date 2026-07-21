@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique
+  passwordHash  String
+  name          String?
+
+  lists         List[]
+  listFolders   ListFolder[]
+  tags          Tag[]
+  tasks         Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ListFolder {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int     @default(0)
+
+  lists List[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model List {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId  Int?
+  folder    ListFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  name      String
+  color     String  @default("gray")
+  sortOrder Int     @default(0)
+
+  tasks Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+}
+
+model Task {
+  id          Int     @id @default(autoincrement())
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listId      Int?
+  list        List?   @relation(fields: [listId], references: [id], onDelete: SetNull)
+
+  title       String
+  note        String  @default("")
+  dueDate     DateTime?
+  dueTime     String?
+  priority    String  @default("none")
+  status      String  @default("todo")
+  completedAt DateTime?
+  sortOrder   Int     @default(0)
+
+  tags TaskTag[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([listId])
+}
+
+model Tag {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name  String
+  color String  @default("gray")
+
+  tasks TaskTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model TaskTag {
+  taskId Int
+  task   Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tagId  Int
+  tag    Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+  @@index([tagId])
+}
