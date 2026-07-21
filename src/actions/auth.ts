@@ -62,8 +62,8 @@ export async function logout() {
 
 export async function requireAuth() {
   const session = await auth()
-  if (!session) {
+  if (!session?.user?.id) {
     throw new Error('Unauthorized: User is not authenticated')
   }
-  return session.user
+  return { ...session.user, id: Number(session.user.id) }
 }

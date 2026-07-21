@@ -26,7 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 src/app/
 ├── layout.tsx                      # 根層布局
-├── page.tsx                        # 重定向至 /app/tasks
+├── page.tsx                        # 重定向至 /tasks
 ├── globals.css                     # 全域樣式
 ├── (auth)/                         # 認證相關路由（路由分組）
 │   └── layout.tsx

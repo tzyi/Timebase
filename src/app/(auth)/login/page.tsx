@@ -32,7 +32,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('電子郵件或密碼不正確')
       } else if (result?.ok) {
-        router.push('/app/tasks')
+        router.push('/tasks')
       }
     } catch (err) {
       setError('登入失敗，請稍後再試')
