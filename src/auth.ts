@@ -4,6 +4,7 @@ import { compare } from "bcrypt";
 
 const prisma = require("@prisma/client").PrismaClient;
 
+// 擴充 Session 型別 : NextAuth 預設的 session.user 不一定包含自訂的 id。這段TypeScript 宣告擴充讓程式知道他們型別
 declare module "next-auth" {
   interface Session {
     user: {
