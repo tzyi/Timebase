@@ -49,6 +49,67 @@ export async function createTask(
   }
 }
 
+export async function moveTaskToGroup(
+  taskId: number,
+  groupId: number | null,
+  targetIndex: number
+) {
+  try {
+    const user = await requireAuth()
+
+    const task = await prisma.task.findUnique({ where: { id: taskId } })
+    if (!task || task.userId !== user.id) {
+      return { success: false, error: '任務不存在或無權限' }
+    }
+
+    if (groupId !== null) {
+      const group = await prisma.taskGroup.findUnique({ where: { id: groupId } })
+      if (!group || group.listId !== task.listId) {
+        return { success: false, error: '分組不存在或不屬於此清單' }
+      }
+    }
+
+    const siblings = await prisma.task.findMany({
+      where: {
+        listId: task.listId,
+        groupId,
+        id: { not: taskId },
+      },
+      orderBy: { sortOrder: 'asc' },
+    })
+
+    const clampedIndex = Math.max(0, Math.min(targetIndex, siblings.length))
+    const reordered = [
+      ...siblings.slice(0, clampedIndex),
+      task,
+      ...siblings.slice(clampedIndex),
+    ]
+
+    await prisma.$transaction(
+      reordered.map((t, index) =>
+        prisma.task.update({
+          where: { id: t.id },
+          data: { groupId, sortOrder: index },
+        })
+      )
+    )
+
+    const updated = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        tags: { include: { tag: true } },
+        list: true,
+        subtasks: { orderBy: { sortOrder: 'asc' } },
+      },
+    })
+
+    return { success: true, data: updated }
+  } catch (error) {
+    console.error('移動任務分組錯誤:', error)
+    return { success: false, error: '移動任務分組失敗' }
+  }
+}
+
 export async function updateTask(
   id: number,
   data: {

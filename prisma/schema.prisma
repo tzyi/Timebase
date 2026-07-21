@@ -29,12 +29,28 @@ model List {
   color     String  @default("gray")
   sortOrder Int     @default(0)
 
-  tasks Task[]
+  tasks      Task[]
+  taskGroups TaskGroup[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model TaskGroup {
+  id        Int     @id @default(autoincrement())
+  listId    Int
+  list      List    @relation(fields: [listId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int     @default(0)
+
+  tasks Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([listId])
 }
 
 model Task {
@@ -43,6 +59,8 @@ model Task {
   user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   listId      Int?
   list        List?   @relation(fields: [listId], references: [id], onDelete: SetNull)
+  groupId     Int?
+  group       TaskGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   title       String
   note        String  @default("")
@@ -63,6 +81,7 @@ model Task {
 
   @@index([userId])
   @@index([listId])
+  @@index([groupId])
 }
 
 model Subtask {

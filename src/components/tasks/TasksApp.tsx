@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { List, Tag, Task, Subtask } from '@prisma/client'
+import dynamic from 'next/dynamic'
+import { List, Tag, Task, Subtask, TaskGroup } from '@prisma/client'
 import Sidebar from './Sidebar'
 import TaskListView from './TaskListView'
 import TaskDetailPanel from './TaskDetailPanel'
@@ -12,14 +13,21 @@ import {
   postponeTask,
   createTask,
 } from '@/actions/tasks'
+import { getBoardForList } from '@/actions/taskGroups'
 import { getLists } from '@/actions/lists'
 import { ensureOnline } from '@/lib/toast'
+
+const BoardView = dynamic(() => import('./BoardView'), { ssr: false })
 
 type TaskWithRelations = Task & {
   list: List | null
   tags: Array<{ tag: Tag }>
   subtasks: Subtask[]
 }
+
+type BoardData = { groups: TaskGroup[]; tasks: TaskWithRelations[] }
+
+const LIST_VIEW_STORAGE_PREFIX = 'timebase:listView:'
 
 type ListWithCount = List & { uncompletedCount?: number }
 
@@ -53,34 +61,45 @@ export default function TasksApp({
   const [selectedView, setSelectedView] = useState<ViewState>(initialView)
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
   const [overdueTasks, setOverdueTasks] = useState<TaskWithRelations[]>(initialOverdueTasks)
+  const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
+  const [boardData, setBoardData] = useState<BoardData>({ groups: [], tasks: [] })
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
+  const isListView = typeof selectedView === 'object' && selectedView.kind === 'list'
+
+  const loadViewData = useCallback(async (view: ViewState, mode: 'list' | 'board') => {
+    if (view === 'today') {
+      const result = await getTodayViewGrouped()
+      if (result.success && result.data) {
+        setTasks(result.data.today)
+        setOverdueTasks(result.data.overdue)
+      }
+      return
+    }
+
+    if (typeof view === 'object' && view.kind === 'list' && mode === 'board') {
+      const result = await getBoardForList(view.listId)
+      if (result.success && result.data) {
+        setBoardData(result.data)
+      }
+      return
+    }
+
+    const result = await getTasksForView(view)
+    if (result.success && result.data) {
+      setTasks(result.data)
+      setOverdueTasks([])
+    }
+  }, [])
+
   const refreshTasks = useCallback(async () => {
     setIsLoadingTasks(true)
     try {
-      if (selectedView === 'today') {
-        const result = await getTodayViewGrouped()
-        if (result.success && result.data) {
-          setTasks(result.data.today)
-          setOverdueTasks(result.data.overdue)
-        }
-      } else if (typeof selectedView === 'string') {
-        const result = await getTasksForView(selectedView)
-        if (result.success && result.data) {
-          setTasks(result.data)
-          setOverdueTasks([])
-        }
-      } else {
-        const result = await getTasksForView(selectedView)
-        if (result.success && result.data) {
-          setTasks(result.data)
-          setOverdueTasks([])
-        }
-      }
+      await loadViewData(selectedView, viewMode)
 
       const listsResult = await getLists()
       if (listsResult.success && listsResult.data) {
@@ -89,38 +108,50 @@ export default function TasksApp({
     } finally {
       setIsLoadingTasks(false)
     }
-  }, [selectedView])
+  }, [selectedView, viewMode, loadViewData])
 
-  const handleSelectView = useCallback(async (view: ViewState) => {
-    setSelectedView(view)
-    setSelectedTaskId(null)
-    setIsDrawerOpen(false)
-    setIsLoadingTasks(true)
+  const handleSelectView = useCallback(
+    async (view: ViewState) => {
+      setSelectedView(view)
+      setSelectedTaskId(null)
+      setIsDrawerOpen(false)
+      setIsLoadingTasks(true)
 
-    try {
-      if (view === 'today') {
-        const result = await getTodayViewGrouped()
-        if (result.success && result.data) {
-          setTasks(result.data.today)
-          setOverdueTasks(result.data.overdue)
-        }
-      } else if (typeof view === 'string') {
-        const result = await getTasksForView(view)
-        if (result.success && result.data) {
-          setTasks(result.data)
-          setOverdueTasks([])
-        }
-      } else {
-        const result = await getTasksForView(view)
-        if (result.success && result.data) {
-          setTasks(result.data)
-          setOverdueTasks([])
-        }
+      const nextMode: 'list' | 'board' =
+        typeof view === 'object' && view.kind === 'list' && typeof window !== 'undefined'
+          ? (window.localStorage.getItem(`${LIST_VIEW_STORAGE_PREFIX}${view.listId}`) as
+              | 'list'
+              | 'board'
+              | null) || 'list'
+          : 'list'
+      setViewMode(nextMode)
+
+      try {
+        await loadViewData(view, nextMode)
+      } finally {
+        setIsLoadingTasks(false)
       }
-    } finally {
-      setIsLoadingTasks(false)
-    }
-  }, [])
+    },
+    [loadViewData]
+  )
+
+  const handleSwitchViewMode = useCallback(
+    async (mode: 'list' | 'board') => {
+      if (!isListView) return
+      setViewMode(mode)
+      const listId = (selectedView as { kind: 'list'; listId: number }).listId
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(`${LIST_VIEW_STORAGE_PREFIX}${listId}`, mode)
+      }
+      setIsLoadingTasks(true)
+      try {
+        await loadViewData(selectedView, mode)
+      } finally {
+        setIsLoadingTasks(false)
+      }
+    },
+    [isListView, selectedView, loadViewData]
+  )
 
   const handleToggleComplete = useCallback(
     async (taskId: number, completed: boolean) => {
@@ -160,7 +191,10 @@ export default function TasksApp({
     [newTaskTitle, selectedView, refreshTasks]
   )
 
-  const selectedTask = tasks.find((t) => t.id === selectedTaskId)
+  const selectedTask =
+    viewMode === 'board'
+      ? boardData.tasks.find((t) => t.id === selectedTaskId)
+      : tasks.find((t) => t.id === selectedTaskId)
 
   return (
     <div className="flex h-full bg-gray-100 relative">
@@ -235,16 +269,50 @@ export default function TasksApp({
               新增
             </button>
           </form>
+
+          {isListView && (
+            <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => handleSwitchViewMode('list')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  viewMode === 'list' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                清單
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSwitchViewMode('board')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  viewMode === 'board' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                看板
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          <TaskListView
-            tasks={tasks}
-            overdueTasks={selectedView === 'today' ? overdueTasks : undefined}
-            onSelectTask={setSelectedTaskId}
-            onToggleComplete={handleToggleComplete}
-            onPostpone={selectedView === 'today' ? handlePostpone : undefined}
-          />
+          {isListView && viewMode === 'board' ? (
+            <BoardView
+              listId={(selectedView as { kind: 'list'; listId: number }).listId}
+              groups={boardData.groups}
+              tasks={boardData.tasks}
+              onSelectTask={setSelectedTaskId}
+              onToggleComplete={handleToggleComplete}
+              onRefresh={refreshTasks}
+            />
+          ) : (
+            <TaskListView
+              tasks={tasks}
+              overdueTasks={selectedView === 'today' ? overdueTasks : undefined}
+              onSelectTask={setSelectedTaskId}
+              onToggleComplete={handleToggleComplete}
+              onPostpone={selectedView === 'today' ? handlePostpone : undefined}
+            />
+          )}
 
           {selectedTask && (
             <TaskDetailPanel
