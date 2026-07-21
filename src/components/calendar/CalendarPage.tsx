@@ -16,7 +16,7 @@ import MonthView from './MonthView'
 import WeekView from './WeekView'
 import DayView from './DayView'
 import DayTasksList from './DayTasksList'
-import TaskDetailModal from './TaskDetailModal'
+import TaskDetailPanel from '@/components/tasks/TaskDetailPanel'
 import { CalendarView, CalendarFiltersState, TaskWithRelations } from './types'
 
 interface CalendarPageProps {
@@ -334,14 +334,16 @@ export default function CalendarPage({
         </div>
       </div>
 
-      <TaskDetailModal
-        task={selectedTask}
-        isOpen={selectedTaskId !== null}
-        onClose={handleModalClose}
-        onSave={() => refreshCurrentView(focusDate, filters)}
-        lists={initialLists}
-        tags={initialTags}
-      />
+      {selectedTask && (
+        <TaskDetailPanel
+          task={selectedTask}
+          lists={initialLists}
+          allTags={initialTags}
+          onClose={handleModalClose}
+          onUpdate={() => refreshCurrentView(focusDate, filters)}
+          variant="modal"
+        />
+      )}
     </div>
   )
 }

@@ -38,6 +38,8 @@ interface TaskDetailPanelProps {
   allTags: (Tag & { taskCount?: number })[]
   onClose: () => void
   onUpdate: () => void
+  /** 'panel'：清單頁側邊面板（預設）。'modal'：置中彈出視窗（例如日曆頁）。 */
+  variant?: 'panel' | 'modal'
 }
 
 export default function TaskDetailPanel({
@@ -46,6 +48,7 @@ export default function TaskDetailPanel({
   allTags,
   onClose,
   onUpdate,
+  variant = 'panel',
 }: TaskDetailPanelProps) {
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
@@ -261,29 +264,23 @@ export default function TaskDetailPanel({
   }
 
   const currentList = lists.find((l) => l.id.toString() === listId)
+  const isModal = variant === 'modal'
 
-  return (
-    <div
-      className="fixed inset-0 z-50 md:z-auto md:relative md:inset-auto w-full md:w-[var(--detail-width)] bg-white md:border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
-      style={{ ['--detail-width' as string]: `${width}px` }}
-    >
-      <div
-        onMouseDown={handleResizeStart}
-        className="hidden md:block absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
-        style={{ marginLeft: '-2px' }}
-      />
-
+  const panelContent = (
+    <>
       {/* 頂部圖示列：到期日 / 優先級 / 關閉 */}
       <div className="flex items-center gap-1 px-4 pt-4 pb-2">
-        <button
-          onClick={onClose}
-          title="返回"
-          className="md:hidden flex items-center gap-1 p-1.5 -ml-1.5 mr-1 rounded hover:bg-gray-100 text-gray-600"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+        {!isModal && (
+          <button
+            onClick={onClose}
+            title="返回"
+            className="md:hidden flex items-center gap-1 p-1.5 -ml-1.5 mr-1 rounded hover:bg-gray-100 text-gray-600"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
 
         <div className="relative" ref={datePickerRef}>
           <button
@@ -395,7 +392,7 @@ export default function TaskDetailPanel({
         <button
           onClick={onClose}
           title="關閉"
-          className="hidden md:block p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+          className={`p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 ${isModal ? '' : 'hidden md:block'}`}
         >
           ✕
         </button>
@@ -523,6 +520,36 @@ export default function TaskDetailPanel({
           </button>
         </div>
       </div>
+    </>
+  )
+
+  if (isModal) {
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {panelContent}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 md:z-auto md:relative md:inset-auto w-full md:w-[var(--detail-width)] bg-white md:border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
+      style={{ ['--detail-width' as string]: `${width}px` }}
+    >
+      <div
+        onMouseDown={handleResizeStart}
+        className="hidden md:block absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 active:bg-blue-500"
+        style={{ marginLeft: '-2px' }}
+      />
+      {panelContent}
     </div>
   )
 }
