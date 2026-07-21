@@ -57,6 +57,7 @@ export default function TaskDetailPanel({
   const [showListPicker, setShowListPicker] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showTagPicker, setShowTagPicker] = useState(false)
+  const [showPriorityPicker, setShowPriorityPicker] = useState(false)
   const [width, setWidth] = useState(DEFAULT_WIDTH)
   const isResizingRef = useRef(false)
 
@@ -114,10 +115,9 @@ export default function TaskDetailPanel({
     onUpdate()
   }
 
-  const handlePriorityCycle = async () => {
-    const currentIndex = PRIORITY_ORDER.indexOf(priority)
-    const nextPriority = PRIORITY_ORDER[(currentIndex + 1) % PRIORITY_ORDER.length]
+  const handlePriorityChange = async (nextPriority: string) => {
     setPriority(nextPriority)
+    setShowPriorityPicker(false)
     await updateTask(task.id, { priority: nextPriority })
     onUpdate()
   }
@@ -236,15 +236,33 @@ export default function TaskDetailPanel({
 
         <div className="flex-1" />
 
-        <button
-          onClick={handlePriorityCycle}
-          title={PRIORITY_LABELS[priority]}
-          className="p-1.5 rounded hover:bg-gray-100"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={PRIORITY_COLORS[priority]} stroke={PRIORITY_COLORS[priority]} strokeWidth="2">
-            <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={priority === 'none' ? 'none' : PRIORITY_COLORS[priority]} />
-          </svg>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowPriorityPicker((v) => !v)}
+            title={PRIORITY_LABELS[priority]}
+            className="p-1.5 rounded hover:bg-gray-100"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={PRIORITY_COLORS[priority]} stroke={PRIORITY_COLORS[priority]} strokeWidth="2">
+              <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={priority === 'none' ? 'none' : PRIORITY_COLORS[priority]} />
+            </svg>
+          </button>
+          {showPriorityPicker && (
+            <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[130px]">
+              {PRIORITY_ORDER.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePriorityChange(p)}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${priority === p ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={PRIORITY_COLORS[p]} stroke={PRIORITY_COLORS[p]} strokeWidth="2">
+                    <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={p === 'none' ? 'none' : PRIORITY_COLORS[p]} />
+                  </svg>
+                  {PRIORITY_LABELS[p]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={onClose}
