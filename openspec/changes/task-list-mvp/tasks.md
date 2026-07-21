@@ -16,11 +16,11 @@
 
 - [x] 3.1 實作註冊 Server Action：Email 唯一性檢查、bcrypt 雜湊密碼、建立 User
 - [x] 3.2 實作註冊頁面 UI（`app/(auth)/register`）
-- [ ] 3.3 設定 Auth.js Credentials Provider，串接登入驗證邏輯
-- [ ] 3.4 實作登入頁面 UI（`app/(auth)/login`）
-- [ ] 3.5 實作登出動作（清除 session）
-- [ ] 3.6 建立中介層/守衛：未登入使用者存取 `app/(app)/*` 導向登入頁
-- [ ] 3.7 為所有任務/清單/標籤相關 Server Action 加上登入態檢查，未登入回傳未授權錯誤
+- [x] 3.3 設定 Auth.js Credentials Provider，串接登入驗證邏輯
+- [x] 3.4 實作登入頁面 UI（`app/(auth)/login`）
+- [x] 3.5 實作登出動作（清除 session）
+- [x] 3.6 建立中介層/守衛：未登入使用者存取 `app/(app)/*` 導向登入頁
+- [x] 3.7 為所有任務/清單/標籤相關 Server Action 加上登入態檢查，未登入回傳未授權錯誤
 
 ## 4. 清單與資料夾管理 (task-management 之一)
 
