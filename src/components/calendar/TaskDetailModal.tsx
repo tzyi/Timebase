@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { TaskWithRelations } from './types'
-import { deleteTask, updateTask } from '@/actions/tasks'
+import { deleteTask, updateTask, toggleTaskComplete } from '@/actions/tasks'
 import { toDateInputValue } from '@/lib/date'
 import { List, Tag } from '@prisma/client'
 
@@ -78,6 +78,16 @@ export default function TaskDetailModal({
         priority,
         listId: listId || null,
       })
+
+      const wasCompleted = task.status === 'done' || !!task.completedAt
+      if (result.success && isCompleted !== wasCompleted) {
+        const toggleResult = await toggleTaskComplete(task.id, isCompleted)
+        if (!toggleResult.success) {
+          setError(toggleResult.error || '保存失敗')
+          setIsSaving(false)
+          return
+        }
+      }
 
       if (result.success) {
         onSave?.()
