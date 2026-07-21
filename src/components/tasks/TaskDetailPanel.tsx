@@ -60,6 +60,10 @@ export default function TaskDetailPanel({
   const [showPriorityPicker, setShowPriorityPicker] = useState(false)
   const [width, setWidth] = useState(DEFAULT_WIDTH)
   const isResizingRef = useRef(false)
+  const listPickerRef = useRef<HTMLDivElement>(null)
+  const datePickerRef = useRef<HTMLDivElement>(null)
+  const tagPickerRef = useRef<HTMLDivElement>(null)
+  const priorityPickerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setTitle(task.title)
@@ -94,6 +98,26 @@ export default function TaskDetailPanel({
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (listPickerRef.current && !listPickerRef.current.contains(target)) {
+        setShowListPicker(false)
+      }
+      if (datePickerRef.current && !datePickerRef.current.contains(target)) {
+        setShowDatePicker(false)
+      }
+      if (tagPickerRef.current && !tagPickerRef.current.contains(target)) {
+        setShowTagPicker(false)
+      }
+      if (priorityPickerRef.current && !priorityPickerRef.current.contains(target)) {
+        setShowPriorityPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const saveTitle = async () => {
@@ -198,7 +222,7 @@ export default function TaskDetailPanel({
 
       {/* 頂部圖示列：到期日 / 優先級 / 關閉 */}
       <div className="flex items-center gap-1 px-4 pt-4 pb-2">
-        <div className="relative">
+        <div className="relative" ref={datePickerRef}>
           <button
             onClick={() => setShowDatePicker((v) => !v)}
             title="設定到期日"
@@ -236,7 +260,7 @@ export default function TaskDetailPanel({
 
         <div className="flex-1" />
 
-        <div className="relative">
+        <div className="relative" ref={priorityPickerRef}>
           <button
             onClick={() => setShowPriorityPicker((v) => !v)}
             title={PRIORITY_LABELS[priority]}
@@ -321,7 +345,7 @@ export default function TaskDetailPanel({
 
       {/* 底部工具列 */}
       <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
-        <div className="relative">
+        <div className="relative" ref={listPickerRef}>
           <button
             onClick={() => setShowListPicker((v) => !v)}
             className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-100"
@@ -353,7 +377,7 @@ export default function TaskDetailPanel({
         </div>
 
         <div className="flex items-center gap-1">
-          <div className="relative">
+          <div className="relative" ref={tagPickerRef}>
             <button
               onClick={() => setShowTagPicker((v) => !v)}
               title="標籤"
