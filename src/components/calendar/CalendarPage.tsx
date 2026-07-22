@@ -55,6 +55,14 @@ export default function CalendarPage({
   const [weekTasks, setWeekTasks] = useState<{ [date: string]: TaskWithRelations[] }>({})
   const [dayTasks, setDayTasks] = useState<TaskWithRelations[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 640)
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
 
   const buildApiFilters = useCallback((currentFilters: CalendarFiltersState): ServerCalendarFilters => ({
     listIds: currentFilters.listIds.length > 0 ? currentFilters.listIds : undefined,
@@ -132,7 +140,10 @@ export default function CalendarPage({
 
   const handleDateClick = useCallback((date: Date) => {
     setFocusDate(date)
-  }, [])
+    if (isMobile && view === 'month') {
+      setView('day')
+    }
+  }, [isMobile, view])
 
   const handleTaskClick = useCallback((taskId: number) => {
     setSelectedTaskId(taskId)
