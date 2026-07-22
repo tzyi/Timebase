@@ -53,7 +53,7 @@ export async function getHabits(dateStr: string) {
     })
 
     const scheduled = habits
-      .filter((h: (typeof habits)[number]) => isScheduledOn(h, dateStr))
+      .filter((h) => isScheduledOn(h, dateStr))
       .map(({ logs, ...habit }) => ({ ...habit, completedToday: logs.length > 0 }))
 
     return { success: true, data: scheduled }
@@ -213,10 +213,7 @@ export async function reorderHabits(orderedIds: number[]) {
     const user = await requireAuth()
 
     const habits = await prisma.habit.findMany({ where: { id: { in: orderedIds } } })
-    if (
-      habits.length !== orderedIds.length ||
-      habits.some((h: (typeof habits)[number]) => h.userId !== user.id)
-    ) {
+    if (habits.length !== orderedIds.length || habits.some((h) => h.userId !== user.id)) {
       return { success: false, error: '習慣不存在或無權限' }
     }
 
