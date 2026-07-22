@@ -166,14 +166,14 @@ export default function LoginPage() {
           </div>
 
           {/* 註冊連結 */}
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <span className="text-gray-600 text-sm">
               還沒有賬戶？{' '}
               <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium">
                 註冊
               </Link>
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
