@@ -40,9 +40,9 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="p-4 border-b border-gray-200">
-        <p className="text-sm font-medium text-gray-700">焦點日期</p>
-        <p className="text-lg text-gray-900 mt-1">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">焦點日期</p>
+        <p className="text-lg text-gray-900 dark:text-gray-100 mt-1">
           {focusDate.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </div>
@@ -50,7 +50,7 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
       <div className="p-4 space-y-4">
         {allDayTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">全天</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">全天</p>
             <div className="space-y-1">
               {allDayTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
@@ -86,7 +86,7 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
 
         {noTimeTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">無時間</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">無時間</p>
             <div className="space-y-1">
               {noTimeTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
@@ -123,7 +123,7 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
 
         {timedTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">定時</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">定時</p>
             <div className="space-y-1">
               {timedTasks.map((task) => {
                 const bgColor = getTaskBackgroundColor(task)
@@ -150,7 +150,7 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
                       className="flex-1 min-w-0 flex items-center gap-2 text-left"
                     >
                       {task.priority === 'high' && <span className="shrink-0 text-red-500">🚩</span>}
-                      <span className="text-xs text-gray-500 shrink-0">{timeDisplay}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">{timeDisplay}</span>
                       <span className="truncate">{task.title}</span>
                     </button>
                   </div>
@@ -161,7 +161,7 @@ export default function DayTasksList({ focusDate, tasks, onTaskClick, onToggleCo
         )}
 
         {tasks.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-8">此日期無任務</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">此日期無任務</p>
         )}
       </div>
     </div>

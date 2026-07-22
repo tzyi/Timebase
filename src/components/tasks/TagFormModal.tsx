@@ -51,25 +51,25 @@ export default function TagFormModal({ isOpen, onClose, onSuccess, tag = null }:
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{isEditing ? '編輯標籤' : '新增標籤'}</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-96">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{isEditing ? '編輯標籤' : '新增標籤'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">標籤名稱</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">標籤名稱</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="例如：工作"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">顏色</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">顏色</label>
             <div className="grid grid-cols-7 gap-2">
               {colors.map((c) => (
                 <button
@@ -77,7 +77,7 @@ export default function TagFormModal({ isOpen, onClose, onSuccess, tag = null }:
                   type="button"
                   onClick={() => setColor(c)}
                   className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    color === c ? 'border-gray-400 ring-2 ring-offset-2 ring-blue-500' : 'border-gray-200'
+                    color === c ? 'border-gray-400 dark:border-gray-500 ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-blue-500' : 'border-gray-200 dark:border-gray-700'
                   }`}
                   style={{
                     backgroundColor:
@@ -112,7 +112,7 @@ export default function TagFormModal({ isOpen, onClose, onSuccess, tag = null }:
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               取消
             </button>

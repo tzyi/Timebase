@@ -28,7 +28,7 @@ export default function LeftPanel({
   tags,
 }: LeftPanelProps) {
   return (
-    <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white">
+    <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
       <FilterBar lists={lists} tags={tags} filters={filters} onFilterChange={onFilterChange} />
       <DayTasksList focusDate={focusDate} tasks={dayTasks} onTaskClick={onTaskClick} onToggleComplete={onToggleComplete} />
     </div>

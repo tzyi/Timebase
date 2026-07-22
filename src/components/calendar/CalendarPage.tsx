@@ -251,8 +251,8 @@ export default function CalendarPage({
       : null
 
   return (
-    <div className="flex h-full bg-gray-100">
-      <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 bg-white">
+    <div className="flex h-full bg-gray-100 dark:bg-gray-950">
+      <div className="hidden lg:flex w-72 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <DayTasksList
           focusDate={focusDate}
           tasks={focusDateTasks}
@@ -262,7 +262,7 @@ export default function CalendarPage({
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             {view === 'week' && (
               <div className="flex items-center gap-1">
@@ -270,7 +270,7 @@ export default function CalendarPage({
                   type="button"
                   onClick={handlePrevWeek}
                   aria-label="上一週"
-                  className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ‹
                 </button>
@@ -278,25 +278,25 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextWeek}
                   aria-label="下一週"
-                  className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
                 </button>
               </div>
             )}
-            <h1 className="text-lg font-semibold text-gray-900">{headerLabel}</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{headerLabel}</h1>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={handleToday}
-              className="px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100"
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               今天
             </button>
 
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {VIEW_LABELS.map(({ value, label }) => (
                 <button
                   key={value}
@@ -304,8 +304,8 @@ export default function CalendarPage({
                   onClick={() => setView(value)}
                   className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                     view === value
-                      ? 'bg-white text-blue-600 shadow-sm font-medium'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm font-medium'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
                 >
                   {label}
@@ -318,7 +318,7 @@ export default function CalendarPage({
         <FilterBar lists={initialLists} tags={initialTags} filters={filters} onFilterChange={setFilters} />
 
         <div className="flex-1 overflow-auto p-4">
-          {!viewReady && <p className="text-xs text-gray-400">載入中...</p>}
+          {!viewReady && <p className="text-xs text-gray-400 dark:text-gray-500">載入中...</p>}
           {viewReady && view === 'month' && (
             <MonthView
               monthTasks={monthTasks}
@@ -355,7 +355,7 @@ export default function CalendarPage({
               onNewTask={handleNewTaskFromTime}
             />
           )}
-          {isLoading && <p className="text-xs text-gray-400 mt-2">載入中...</p>}
+          {isLoading && <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">載入中...</p>}
         </div>
       </div>
 

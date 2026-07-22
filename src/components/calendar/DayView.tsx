@@ -122,14 +122,14 @@ export default function DayView({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm flex flex-col h-full">
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm flex flex-col h-full">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onPrevDay}
             aria-label="上一天"
-            className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+            className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             ‹ 上一天
           </button>
@@ -137,17 +137,17 @@ export default function DayView({
             type="button"
             onClick={onNextDay}
             aria-label="下一天"
-            className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+            className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             下一天 ›
           </button>
         </div>
-        <h2 className="text-sm font-medium text-gray-900">{formatDate(focusDate)}</h2>
+        <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatDate(focusDate)}</h2>
         <button
           type="button"
           onClick={onToday}
           className={`px-3 py-1 text-xs rounded-md transition-colors ${
-            isToday ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            isToday ? 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
           }`}
         >
           今天
@@ -155,7 +155,7 @@ export default function DayView({
       </div>
 
       {untimedTasks.length > 0 && (
-        <div className="border-b border-gray-200 p-2 space-y-1">
+        <div className="border-b border-gray-200 dark:border-gray-800 p-2 space-y-1">
           {untimedTasks.map((task) => {
             const bgColor = getTaskBackgroundColor(task)
             const textColor = getTaskTextColor(task)
@@ -184,14 +184,14 @@ export default function DayView({
               <div
                 key={hour}
                 style={{ height: HOUR_HEIGHT }}
-                className="text-[10px] text-gray-400 text-right pr-1 -translate-y-2"
+                className="text-[10px] text-gray-400 dark:text-gray-500 text-right pr-1 -translate-y-2"
               >
                 {String(hour).padStart(2, '0')}:00
               </div>
             ))}
           </div>
           <div
-            className="flex-1 relative border-l border-gray-100"
+            className="flex-1 relative border-l border-gray-100 dark:border-gray-800"
             style={{ height: HOUR_HEIGHT * 24 }}
             onDragOver={handleColumnDragOver}
             onDrop={handleColumnDrop}
@@ -200,7 +200,7 @@ export default function DayView({
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="border-b border-gray-50"
+                className="border-b border-gray-50 dark:border-gray-800"
                 style={{ height: HOUR_HEIGHT }}
               />
             ))}

@@ -41,7 +41,7 @@ export default function BoardCard({ task, onSelectTask, onToggleComplete }: Boar
       {...attributes}
       {...listeners}
       onClick={() => onSelectTask(task.id)}
-      className="bg-white border border-gray-200 rounded-lg p-3 mb-2 shadow-sm hover:shadow-md cursor-pointer transition-shadow"
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-2 shadow-sm hover:shadow-md cursor-pointer transition-shadow"
     >
       <div className="flex items-start gap-2">
         <input
@@ -55,7 +55,7 @@ export default function BoardCard({ task, onSelectTask, onToggleComplete }: Boar
           }}
         />
         <p
-          className={`text-sm flex-1 min-w-0 ${isCompleted ? 'line-through text-gray-400' : 'text-gray-900'}`}
+          className={`text-sm flex-1 min-w-0 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}
         >
           {task.title}
         </p>
@@ -79,15 +79,15 @@ export default function BoardCard({ task, onSelectTask, onToggleComplete }: Boar
           {task.tags.slice(0, 2).map(({ tag }) => (
             <span
               key={tag.id}
-              className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600"
+              className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
             >
               {tag.name}
             </span>
           ))}
-          {task.tags.length > 2 && <span className="text-xs text-gray-400">+{task.tags.length - 2}</span>}
+          {task.tags.length > 2 && <span className="text-xs text-gray-400 dark:text-gray-500">+{task.tags.length - 2}</span>}
           {task.dueDate && (
             <span
-              className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 font-medium' : 'text-blue-600'}`}
+              className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : 'text-blue-600 dark:text-blue-400'}`}
             >
               {formatDueDate(task.dueDate)}
               {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}

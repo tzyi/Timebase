@@ -63,18 +63,18 @@ export default function NewTaskModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col"
+        className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit} className="flex flex-col">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h2 className="text-sm font-medium text-gray-500">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">
               新建任務・{formatDueDate(new Date(dueDate + 'T00:00:00'))}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               ✕
             </button>
@@ -87,7 +87,7 @@ export default function NewTaskModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="任務標題"
               autoFocus
-              className="w-full text-lg font-semibold text-gray-900 border-none outline-none focus:ring-0 p-0"
+              className="w-full text-lg font-semibold text-gray-900 dark:text-gray-100 border-none outline-none focus:ring-0 p-0 bg-transparent"
             />
           </div>
 
@@ -96,9 +96,9 @@ export default function NewTaskModal({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="text-sm border border-gray-300 rounded px-2 py-1"
+              className="text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1"
             />
-            <label className="flex items-center gap-1.5 text-sm text-gray-700">
+            <label className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={allDay}
@@ -112,32 +112,32 @@ export default function NewTaskModal({
           {!allDay && (
             <div className="px-4 pb-2 flex items-center gap-2">
               <div className="flex-1 min-w-0">
-                <label className="block text-xs text-gray-500 mb-0.5">開始時間</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">開始時間</label>
                 <input
                   type="time"
                   value={dueTime}
                   onChange={(e) => setDueTime(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded px-1.5 py-1"
+                  className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-1.5 py-1"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <label className="block text-xs text-gray-500 mb-0.5">結束時間</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">結束時間</label>
                 <input
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded px-1.5 py-1"
+                  className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-1.5 py-1"
                 />
               </div>
             </div>
           )}
 
           <div className="px-4 pb-4">
-            <label className="block text-xs text-gray-500 mb-0.5">清單</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">清單</label>
             <select
               value={listId}
               onChange={(e) => setListId(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+              className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1"
             >
               <option value="">收集箱</option>
               {lists.map((l) => (
@@ -148,11 +148,11 @@ export default function NewTaskModal({
             </select>
           </div>
 
-          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200 dark:border-gray-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-sm text-gray-600 rounded hover:bg-gray-100"
+              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               取消
             </button>

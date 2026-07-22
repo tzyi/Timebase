@@ -121,8 +121,8 @@ export default function WeekView({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm flex flex-col h-full">
-      <div className="flex border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm flex flex-col h-full">
+      <div className="flex border-b border-gray-200 dark:border-gray-800">
         <div className="w-14 shrink-0" />
         <div className="flex-1 grid grid-cols-7">
           {days.map((date) => {
@@ -134,16 +134,16 @@ export default function WeekView({
                 key={dateStr}
                 type="button"
                 onClick={() => onDateClick(date)}
-                className={`flex flex-col items-center py-2 border-r border-gray-100 last:border-r-0 hover:bg-gray-50 transition-colors ${
-                  isFocused ? 'bg-blue-50' : ''
+                className={`flex flex-col items-center py-2 border-r border-gray-100 dark:border-gray-800 last:border-r-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                  isFocused ? 'bg-blue-50 dark:bg-blue-950' : ''
                 }`}
               >
-                <span className={`text-xs ${isWeekend(date) ? 'text-red-400' : 'text-gray-500'}`}>
+                <span className={`text-xs ${isWeekend(date) ? 'text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                   {getDayName(date)}
                 </span>
                 <span
                   className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mt-0.5 ${
-                    isToday ? 'bg-blue-500 text-white font-semibold' : 'text-gray-700'
+                    isToday ? 'bg-blue-500 text-white font-semibold' : 'text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {date.getDate()}
@@ -154,8 +154,8 @@ export default function WeekView({
         </div>
       </div>
 
-      <div className="flex border-b border-gray-200">
-        <div className="w-14 shrink-0 flex items-center justify-center text-[10px] text-gray-400">
+      <div className="flex border-b border-gray-200 dark:border-gray-800">
+        <div className="w-14 shrink-0 flex items-center justify-center text-[10px] text-gray-400 dark:text-gray-500">
           全天
         </div>
         <div className="flex-1 grid grid-cols-7 min-h-[32px]">
@@ -168,7 +168,7 @@ export default function WeekView({
             return (
               <div
                 key={dateStr}
-                className="border-r border-gray-100 last:border-r-0 p-0.5 space-y-0.5"
+                className="border-r border-gray-100 dark:border-gray-800 last:border-r-0 p-0.5 space-y-0.5"
               >
                 {untimedTasks.map((task) => {
                   const bgColor = getTaskBackgroundColor(task)
@@ -201,7 +201,7 @@ export default function WeekView({
               <div
                 key={hour}
                 style={{ height: HOUR_HEIGHT }}
-                className="text-[10px] text-gray-400 text-right pr-1 -translate-y-2"
+                className="text-[10px] text-gray-400 dark:text-gray-500 text-right pr-1 -translate-y-2"
               >
                 {String(hour).padStart(2, '0')}:00
               </div>
@@ -219,7 +219,7 @@ export default function WeekView({
               return (
                 <div
                   key={dateStr}
-                  className="relative border-r border-gray-100 last:border-r-0"
+                  className="relative border-r border-gray-100 dark:border-gray-800 last:border-r-0"
                   style={{ height: HOUR_HEIGHT * 24 }}
                   onDragOver={(e) => handleColumnDragOver(e, dateStr)}
                   onDrop={(e) => handleColumnDrop(e, dateStr)}
@@ -228,7 +228,7 @@ export default function WeekView({
                   {HOURS.map((hour) => (
                     <div
                       key={hour}
-                      className="border-b border-gray-50"
+                      className="border-b border-gray-50 dark:border-gray-800"
                       style={{ height: HOUR_HEIGHT }}
                     />
                   ))}

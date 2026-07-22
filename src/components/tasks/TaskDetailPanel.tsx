@@ -431,25 +431,25 @@ export default function TaskDetailPanel({
             />
           ))}
 
-          <form onSubmit={handleAddSubtask} className="flex items-center gap-2 py-2 border-b border-gray-100">
-            <span className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
+          <form onSubmit={handleAddSubtask} className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-800">
+            <span className="w-4 h-4 rounded border border-gray-300 dark:border-gray-700 flex-shrink-0" />
             <input
               type="text"
               value={newSubtaskTitle}
               onChange={(e) => setNewSubtaskTitle(e.target.value)}
               placeholder="新增子任務"
-              className="flex-1 text-sm text-gray-700 border-none outline-none focus:ring-0 p-0 placeholder:text-gray-400"
+              className="flex-1 text-sm text-gray-700 dark:text-gray-300 border-none outline-none focus:ring-0 p-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent"
             />
           </form>
         </div>
       </div>
 
       {/* 底部工具列 */}
-      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
+      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-gray-800">
         <div className="relative" ref={listPickerRef}>
           <button
             onClick={() => setShowListPicker((v) => !v)}
-            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-100"
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 7l3-3h5l2 2h8v11a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
@@ -457,10 +457,10 @@ export default function TaskDetailPanel({
             {currentList ? currentList.name : '收集箱'}
           </button>
           {showListPicker && (
-            <div className="absolute left-0 bottom-full mb-1 z-10 bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[140px]">
+            <div className="absolute left-0 bottom-full mb-1 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded shadow-lg py-1 min-w-[140px]">
               <button
                 onClick={() => handleListChange('')}
-                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${!listId ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${!listId ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
               >
                 收集箱
               </button>
@@ -468,7 +468,7 @@ export default function TaskDetailPanel({
                 <button
                   key={l.id}
                   onClick={() => handleListChange(l.id.toString())}
-                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${listId === l.id.toString() ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${listId === l.id.toString() ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                 >
                   {l.name}
                 </button>
@@ -482,7 +482,7 @@ export default function TaskDetailPanel({
             <button
               onClick={() => setShowTagPicker((v) => !v)}
               title="標籤"
-              className="p-1.5 rounded hover:bg-gray-100 text-gray-500"
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L4 3a1 1 0 00-1 1l.24 5.59a2 2 0 00.58 1.41l9.59 9.58a2 2 0 002.83 0l5.35-5.35a2 2 0 000-2.82z" />
@@ -490,19 +490,19 @@ export default function TaskDetailPanel({
               </svg>
             </button>
             {showTagPicker && (
-              <div className="absolute right-0 bottom-full mb-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-2 min-w-[160px]">
+              <div className="absolute right-0 bottom-full mb-1 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded shadow-lg p-2 min-w-[160px]">
                 {allTags.length === 0 && (
-                  <p className="text-xs text-gray-400 px-1 py-1">尚無標籤</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 px-1 py-1">尚無標籤</p>
                 )}
                 {allTags.map((tag) => (
-                  <label key={tag.id} className="flex items-center gap-2 cursor-pointer px-1 py-1 hover:bg-gray-50 rounded">
+                  <label key={tag.id} className="flex items-center gap-2 cursor-pointer px-1 py-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
                     <input
                       type="checkbox"
                       checked={assignedTagIds.has(tag.id)}
                       onChange={() => handleTagToggle(tag.id)}
                       className="w-3.5 h-3.5 rounded"
                     />
-                    <span className="text-sm text-gray-700">{tag.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{tag.name}</span>
                   </label>
                 ))}
               </div>
@@ -512,7 +512,7 @@ export default function TaskDetailPanel({
           <button
             onClick={handleDelete}
             title="刪除任務"
-            className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600"
+            className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6" />
@@ -530,7 +530,7 @@ export default function TaskDetailPanel({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-y-auto"
+          className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {panelContent}
@@ -541,7 +541,7 @@ export default function TaskDetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 md:z-auto md:relative md:inset-auto w-full md:w-[var(--detail-width)] bg-white md:border-l border-gray-200 flex flex-col overflow-y-auto flex-shrink-0"
+      className="fixed inset-0 z-50 md:z-auto md:relative md:inset-auto w-full md:w-[var(--detail-width)] bg-white dark:bg-gray-900 md:border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-y-auto flex-shrink-0"
       style={{ ['--detail-width' as string]: `${width}px` }}
     >
       <div
@@ -572,7 +572,7 @@ function SubtaskRow({
   }, [subtask.title])
 
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-gray-100 group">
+    <div className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-800 group">
       <input
         type="checkbox"
         checked={subtask.completed}
@@ -585,12 +585,12 @@ function SubtaskRow({
         onChange={(e) => setTitle(e.target.value)}
         onBlur={() => onRename(subtask.id, title.trim())}
         className={`flex-1 text-sm border-none outline-none focus:ring-0 p-0 bg-transparent ${
-          subtask.completed ? 'line-through text-gray-400' : 'text-gray-700'
+          subtask.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'
         }`}
       />
       <button
         onClick={() => onDelete(subtask.id)}
-        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 text-xs px-1"
+        className="opacity-0 group-hover:opacity-100 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 text-xs px-1"
       >
         ✕
       </button>

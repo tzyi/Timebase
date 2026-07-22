@@ -192,7 +192,7 @@ export default function BoardView({
   }
 
   return (
-    <div className="flex-1 bg-white overflow-x-auto">
+    <div className="flex-1 bg-white dark:bg-gray-900 overflow-x-auto">
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetection}
@@ -221,7 +221,7 @@ export default function BoardView({
           <button
             type="button"
             onClick={handleCreateGroup}
-            className="flex-shrink-0 w-40 h-10 mt-0 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400"
+            className="flex-shrink-0 w-40 h-10 mt-0 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg hover:border-gray-400 dark:hover:border-gray-600"
           >
             + 新分組
           </button>

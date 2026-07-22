@@ -54,7 +54,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
     filters.listIds.length > 0 || filters.tagIds.length > 0 || filters.priorities.length > 0
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-2 flex items-center gap-2 flex-wrap">
+    <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-2 flex items-center gap-2 flex-wrap">
       <FilterDropdown
         label="清單"
         isOpen={openDropdown === 'list'}
@@ -64,7 +64,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
         {lists.map((list) => (
           <label
             key={list.id}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-gray-700 dark:text-gray-300"
           >
             <input
               type="checkbox"
@@ -75,7 +75,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
             {list.name}
           </label>
         ))}
-        {lists.length === 0 && <p className="px-3 py-2 text-xs text-gray-400">無清單</p>}
+        {lists.length === 0 && <p className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">無清單</p>}
       </FilterDropdown>
 
       <FilterDropdown
@@ -87,7 +87,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
         {tags.map((tag) => (
           <label
             key={tag.id}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-gray-700 dark:text-gray-300"
           >
             <input
               type="checkbox"
@@ -98,7 +98,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
             {tag.name}
           </label>
         ))}
-        {tags.length === 0 && <p className="px-3 py-2 text-xs text-gray-400">無標籤</p>}
+        {tags.length === 0 && <p className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">無標籤</p>}
       </FilterDropdown>
 
       <FilterDropdown
@@ -110,7 +110,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
         {PRIORITY_OPTIONS.map((option) => (
           <label
             key={option.value}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-gray-700 dark:text-gray-300"
           >
             <input
               type="checkbox"
@@ -127,7 +127,7 @@ export default function FilterBar({ lists, tags, filters, onFilterChange }: Filt
         <button
           type="button"
           onClick={clearAll}
-          className="text-xs text-gray-400 hover:text-gray-600 ml-1"
+          className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 ml-1"
         >
           清除過濾器
         </button>
@@ -156,15 +156,15 @@ function FilterDropdown({
         onClick={onToggle}
         className={`px-3 py-1.5 text-sm rounded-lg border flex items-center gap-1 ${
           count > 0
-            ? 'border-blue-400 text-blue-600 bg-blue-50'
-            : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+            ? 'border-blue-400 dark:border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
+            : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
         }`}
       >
         {label}
         {count > 0 && <span className="text-xs">({count})</span>}
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 max-h-64 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+        <div className="absolute top-full left-0 mt-1 w-48 max-h-64 overflow-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg z-20 py-1">
           {children}
         </div>
       )}

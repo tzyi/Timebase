@@ -104,15 +104,15 @@ export default function BoardColumn({
     <div
       ref={setSortableRef}
       style={style}
-      className="flex flex-col w-72 flex-shrink-0 bg-gray-50 rounded-lg h-full"
+      className="flex flex-col w-72 flex-shrink-0 bg-gray-50 dark:bg-gray-900 rounded-lg h-full"
     >
-      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-200">
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-200 dark:border-gray-800">
         {group && (
           <span
             {...attributes}
             {...listeners}
             title="拖曳排序分組"
-            className="cursor-grab active:cursor-grabbing text-gray-400 select-none"
+            className="cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 select-none"
           >
             ⠿
           </span>
@@ -125,20 +125,20 @@ export default function BoardColumn({
               onChange={(e) => setNameInput(e.target.value)}
               onBlur={handleRenameSubmit}
               autoFocus
-              className="w-full text-sm font-medium border border-blue-300 rounded px-1.5 py-0.5"
+              className="w-full text-sm font-medium border border-blue-300 dark:border-blue-700 dark:bg-gray-800 dark:text-gray-100 rounded px-1.5 py-0.5"
             />
           </form>
         ) : (
-          <h3 className="text-sm font-medium text-gray-800 flex-1 truncate">
+          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 flex-1 truncate">
             {group ? group.name : '未分組'}
           </h3>
         )}
-        <span className="text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-600">{tasks.length}</span>
+        <span className="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300">{tasks.length}</span>
         <button
           type="button"
           onClick={() => setIsAddingTask(true)}
           title="新增任務"
-          className="p-1 rounded hover:bg-gray-200 text-gray-500"
+          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
         >
           +
         </button>
@@ -148,26 +148,26 @@ export default function BoardColumn({
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               title="更多選項"
-              className="p-1 rounded hover:bg-gray-200 text-gray-500"
+              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
             >
               ⋯
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg py-1 w-32">
+              <div className="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded shadow-lg py-1 w-32">
                 <button
                   type="button"
                   onClick={() => {
                     setIsRenaming(true)
                     setMenuOpen(false)
                   }}
-                  className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   改名
                 </button>
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className="w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-gray-100"
+                  className="w-full text-left px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   刪除
                 </button>
@@ -180,7 +180,7 @@ export default function BoardColumn({
       <div
         ref={setDropRef}
         className={`flex-1 min-h-[120px] overflow-y-auto p-2 rounded-b-lg transition-colors ${
-          isOver ? 'bg-blue-50' : ''
+          isOver ? 'bg-blue-50 dark:bg-blue-950' : ''
         }`}
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
@@ -205,14 +205,14 @@ export default function BoardColumn({
               }}
               placeholder="新增任務標題..."
               autoFocus
-              className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 bg-white"
+              className="w-full text-sm border border-gray-300 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100"
             />
           </form>
         ) : (
           <button
             type="button"
             onClick={() => setIsAddingTask(true)}
-            className="w-full text-left text-sm text-gray-400 hover:text-gray-600 px-2 py-1.5"
+            className="w-full text-left text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 px-2 py-1.5"
           >
             + 新增任務
           </button>
