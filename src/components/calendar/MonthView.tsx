@@ -103,7 +103,7 @@ export default function MonthView({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm" onWheel={handleWheel}>
       <div className="flex">
-        <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+        <div className="hidden sm:block w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
           <div className="px-2 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">週</div>
           {weeks.map((week) => (
             <div
