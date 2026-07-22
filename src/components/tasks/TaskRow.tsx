@@ -41,8 +41,37 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
         >
           {task.title}
         </p>
+        {(task.tags.length > 0 || task.list || task.dueDate) && (
+          <div className="flex items-center gap-1 mt-1 flex-wrap md:hidden">
+            {task.tags.slice(0, 2).map(({ tag }) => (
+              <span
+                key={tag.id}
+                className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+              >
+                {tag.name}
+              </span>
+            ))}
+            {task.tags.length > 2 && <span className="text-xs text-gray-400 dark:text-gray-500">+{task.tags.length - 2}</span>}
+
+            {task.list && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                {task.list.name}
+              </span>
+            )}
+
+            {task.dueDate && (
+              <span
+                className={`text-xs ${isTaskOverdue && !isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : 'text-blue-600 dark:text-blue-400'}`}
+              >
+                {formatDueDate(task.dueDate)}
+                {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}
+              </span>
+            )}
+          </div>
+        )}
+
         {task.tags.length > 0 && (
-          <div className="flex gap-1 mt-1 flex-wrap">
+          <div className="hidden md:flex gap-1 mt-1 flex-wrap">
             {task.tags.slice(0, 2).map(({ tag }) => (
               <span
                 key={tag.id}
@@ -57,14 +86,14 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
       </div>
 
       {task.list && (
-        <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+        <span className="hidden md:inline-block text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap">
           {task.list.name}
         </span>
       )}
 
       {task.dueDate && (
         <span
-          className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : 'text-blue-600 dark:text-blue-400'}`}
+          className={`hidden md:inline-block text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : 'text-blue-600 dark:text-blue-400'}`}
         >
           {formatDueDate(task.dueDate)}
           {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}
@@ -73,7 +102,7 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
 
       {task.priority !== 'none' && (
         <div
-          className="w-2 h-2 rounded-full"
+          className="w-2 h-2 rounded-full shrink-0"
           style={{
             backgroundColor:
               task.priority === 'high'
