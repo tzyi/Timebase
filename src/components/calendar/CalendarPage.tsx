@@ -297,7 +297,7 @@ export default function CalendarPage({
                   type="button"
                   onClick={handlePrevWeek}
                   aria-label="上一週"
-                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-3 md:px-2 py-2.5 md:py-1 text-lg md:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ‹
                 </button>
@@ -305,7 +305,7 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextWeek}
                   aria-label="下一週"
-                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-3 md:px-2 py-2.5 md:py-1 text-lg md:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
                 </button>
@@ -317,7 +317,7 @@ export default function CalendarPage({
                   type="button"
                   onClick={handlePrevMonth}
                   aria-label="上個月"
-                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-3 md:px-2 py-2.5 md:py-1 text-lg md:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ‹
                 </button>
@@ -325,7 +325,7 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextMonth}
                   aria-label="下個月"
-                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-3 md:px-2 py-2.5 md:py-1 text-lg md:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
                 </button>
