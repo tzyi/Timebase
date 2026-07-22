@@ -1,7 +1,19 @@
-export default function HabitPage() {
-  return (
-    <div className="h-full flex items-center justify-center bg-gray-100">
-      <p className="text-gray-500 text-sm">習慣功能開發中</p>
-    </div>
-  )
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import { getHabits } from '@/actions/habits'
+import { dateToString, getToday } from '@/lib/calendarHelpers'
+import HabitPage from '@/components/habit/HabitPage'
+
+export default async function HabitRoutePage() {
+  const session = await auth()
+
+  if (!session) {
+    redirect('/login')
+  }
+
+  const todayStr = dateToString(getToday())
+  const result = await getHabits(todayStr)
+  const initialHabits = result.success && result.data ? result.data : []
+
+  return <HabitPage initialHabits={initialHabits} initialDateStr={todayStr} />
 }
