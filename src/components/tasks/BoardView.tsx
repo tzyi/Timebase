@@ -8,7 +8,8 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -56,8 +57,11 @@ export default function BoardView({
     setLocalTasks(tasks)
   }, [tasks])
 
+  // 桌面版：滑鼠移動 8px 即開始拖曳。
+  // 手機版：需長按 250ms 才進入拖曳模式，避免與捲動、點擊手勢衝突。
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } })
   )
 
   const columns: { group: TaskGroup | null; tasks: TaskWithRelations[] }[] = [

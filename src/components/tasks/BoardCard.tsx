@@ -24,6 +24,8 @@ export default function BoardCard({ task, onSelectTask, onToggleComplete }: Boar
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
+    touchAction: 'manipulation',
+    WebkitTouchCallout: 'none' as const,
   }
 
   const isCompleted = task.status === 'done'
