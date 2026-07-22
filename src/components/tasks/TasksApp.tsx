@@ -122,7 +122,7 @@ export default function TasksApp({
           ? (window.localStorage.getItem(`${LIST_VIEW_STORAGE_PREFIX}${view.listId}`) as
               | 'list'
               | 'board'
-              | null) || 'list'
+              | null) || 'board'
           : 'list'
       setViewMode(nextMode)
 
