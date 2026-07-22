@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   isSameDay,
   getTaskBackgroundColor,
@@ -60,6 +60,31 @@ export default function DayView({
   const [dragDuration, setDragDuration] = useState<number>(MIN_DURATION)
   const [dragOverMinutes, setDragOverMinutes] = useState<number | null>(null)
 
+  // 手機觸控拖曳用的 ref：避免在 touchmove/touchend 的原生事件監聽器中讀到過期的 state。
+  const columnRef = useRef<HTMLDivElement>(null)
+  const dragDurationRef = useRef(MIN_DURATION)
+  const dragOverMinutesRef = useRef<number | null>(null)
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const isTouchDraggingRef = useRef(false)
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  const computeSnappedMinutes = (clientY: number, duration: number) => {
+    if (!columnRef.current) return null
+    const rect = columnRef.current.getBoundingClientRect()
+    const offsetY = clientY - rect.top
+    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
+    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
+    const maxStart = Math.max(DAY_MINUTES - duration, 0)
+    return Math.min(Math.max(snapped, 0), maxStart)
+  }
+
   const handleTaskDragStart = (e: React.DragEvent, task: TaskWithRelations) => {
     const isCompleted = task.status === 'done' || !!task.completedAt
     if (isCompleted) {
@@ -68,39 +93,32 @@ export default function DayView({
     }
     const start = timeToMinutes(task.dueTime || '00:00')
     const end = timeToMinutes(task.endTime || '00:00')
+    const duration = Math.max(end - start, MIN_DURATION)
     setDraggedTaskId(task.id)
-    setDragDuration(Math.max(end - start, MIN_DURATION))
+    setDragDuration(duration)
+    dragDurationRef.current = duration
     e.dataTransfer.effectAllowed = 'move'
   }
 
   const handleTaskDragEnd = () => {
     setDraggedTaskId(null)
     setDragOverMinutes(null)
+    dragOverMinutesRef.current = null
   }
 
   const handleColumnDragOver = (e: React.DragEvent) => {
     if (draggedTaskId === null) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    const rect = e.currentTarget.getBoundingClientRect()
-    const offsetY = e.clientY - rect.top
-    const rawMinutes = (offsetY / HOUR_HEIGHT) * 60
-    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES
-    const maxStart = Math.max(DAY_MINUTES - dragDuration, 0)
-    setDragOverMinutes(Math.min(Math.max(snapped, 0), maxStart))
+    const minutes = computeSnappedMinutes(e.clientY, dragDuration)
+    if (minutes === null) return
+    setDragOverMinutes(minutes)
+    dragOverMinutesRef.current = minutes
   }
 
-  const handleColumnDrop = async (e: React.DragEvent) => {
-    e.preventDefault()
-    const taskId = draggedTaskId
-    const startMinutes = dragOverMinutes
-    setDraggedTaskId(null)
-    setDragOverMinutes(null)
-
-    if (taskId === null || startMinutes === null) return
-
+  const commitDrop = async (taskId: number, startMinutes: number, duration: number) => {
     const newDueTime = minutesToTime(startMinutes)
-    const newEndTime = minutesToTime(Math.min(startMinutes + dragDuration, DAY_MINUTES))
+    const newEndTime = minutesToTime(Math.min(startMinutes + duration, DAY_MINUTES))
 
     if (onTaskTimeUpdate) {
       const success = await onTaskTimeUpdate(taskId, dateToString(focusDate), newDueTime, newEndTime)
@@ -109,6 +127,86 @@ export default function DayView({
       }
     }
   }
+
+  const handleColumnDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    const taskId = draggedTaskId
+    const startMinutes = dragOverMinutes
+    setDraggedTaskId(null)
+    setDragOverMinutes(null)
+    dragOverMinutesRef.current = null
+
+    if (taskId === null || startMinutes === null) return
+    await commitDrop(taskId, startMinutes, dragDuration)
+  }
+
+  // 手機版：長按 250ms 進入拖曳模式，避免與捲動、單擊手勢衝突。
+  const handleTaskTouchStart = (e: React.TouchEvent, task: TaskWithRelations) => {
+    const isCompleted = task.status === 'done' || !!task.completedAt
+    if (isCompleted) return
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+    clearLongPressTimer()
+    longPressTimerRef.current = setTimeout(() => {
+      const start = timeToMinutes(task.dueTime || '00:00')
+      const end = timeToMinutes(task.endTime || '00:00')
+      const duration = Math.max(end - start, MIN_DURATION)
+      isTouchDraggingRef.current = true
+      dragDurationRef.current = duration
+      setDragDuration(duration)
+      setDraggedTaskId(task.id)
+    }, 250)
+  }
+
+  const handleTaskTouchMove = (e: React.TouchEvent) => {
+    if (isTouchDraggingRef.current || !touchStartRef.current) return
+    const touch = e.touches[0]
+    const dx = Math.abs(touch.clientX - touchStartRef.current.x)
+    const dy = Math.abs(touch.clientY - touchStartRef.current.y)
+    if (dx > 8 || dy > 8) clearLongPressTimer()
+  }
+
+  const handleTaskTouchEnd = () => {
+    clearLongPressTimer()
+    touchStartRef.current = null
+  }
+
+  useEffect(() => {
+    if (draggedTaskId === null) return
+
+    const handleMove = (e: TouchEvent) => {
+      if (!isTouchDraggingRef.current) return
+      e.preventDefault()
+      const touch = e.touches[0]
+      const minutes = computeSnappedMinutes(touch.clientY, dragDurationRef.current)
+      if (minutes === null) return
+      dragOverMinutesRef.current = minutes
+      setDragOverMinutes(minutes)
+    }
+
+    const handleEnd = () => {
+      if (!isTouchDraggingRef.current) return
+      isTouchDraggingRef.current = false
+      const taskId = draggedTaskId
+      const startMinutes = dragOverMinutesRef.current
+      const duration = dragDurationRef.current
+      setDraggedTaskId(null)
+      setDragOverMinutes(null)
+      dragOverMinutesRef.current = null
+      if (startMinutes === null) return
+      void commitDrop(taskId, startMinutes, duration)
+    }
+
+    document.addEventListener('touchmove', handleMove, { passive: false })
+    document.addEventListener('touchend', handleEnd)
+    document.addEventListener('touchcancel', handleEnd)
+    return () => {
+      document.removeEventListener('touchmove', handleMove)
+      document.removeEventListener('touchend', handleEnd)
+      document.removeEventListener('touchcancel', handleEnd)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draggedTaskId])
 
   const handleColumnDoubleClick = (e: React.MouseEvent) => {
     if (!onNewTask) return
@@ -191,6 +289,7 @@ export default function DayView({
             ))}
           </div>
           <div
+            ref={columnRef}
             className="flex-1 relative border-l border-gray-100 dark:border-gray-800"
             style={{ height: HOUR_HEIGHT * 24 }}
             onDragOver={handleColumnDragOver}
@@ -217,6 +316,9 @@ export default function DayView({
                   draggable={!isCompleted}
                   onDragStart={(e) => handleTaskDragStart(e, task)}
                   onDragEnd={handleTaskDragEnd}
+                  onTouchStart={(e) => handleTaskTouchStart(e, task)}
+                  onTouchMove={handleTaskTouchMove}
+                  onTouchEnd={handleTaskTouchEnd}
                   onClick={() => onTaskClick(task.id)}
                   style={{
                     position: 'absolute',
@@ -224,6 +326,8 @@ export default function DayView({
                     height: Math.max(layout.height, 24),
                     left: `${layout.left}%`,
                     width: `${100 / layout.columnCount}%`,
+                    touchAction: 'manipulation',
+                    WebkitTouchCallout: 'none',
                   }}
                   className={`overflow-hidden text-left text-xs px-2 py-1 rounded border border-black/5 transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
                     isCompleted ? 'line-through opacity-70 cursor-not-allowed' : 'cursor-grab'
