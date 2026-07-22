@@ -69,7 +69,7 @@ export async function getLogsForHabitsOnDate(habitIds: number[], dateStr: string
     }
 
     const habits = await prisma.habit.findMany({ where: { id: { in: habitIds } } })
-    if (habits.some((h) => h.userId !== user.id)) {
+    if (habits.some((h: { userId: number }) => h.userId !== user.id)) {
       return { success: false, error: '習慣不存在或無權限' }
     }
 
