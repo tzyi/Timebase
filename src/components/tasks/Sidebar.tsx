@@ -172,7 +172,7 @@ export default function Sidebar({
       {/* 標籤 */}
       <div className="p-4">
         <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">標籤</h3>
-        <div className="space-y-1 mb-2">
+        <div className="space-y-1 mb-2 max-h-[152px] overflow-y-auto pr-2 -mr-2">
           {tags.map((tag) => (
             <button
               key={tag.id}
