@@ -289,15 +289,15 @@ export default function CalendarPage({
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-3 md:px-6 py-2 md:py-3 flex items-center justify-between gap-2 md:gap-4">
+          <div className="flex items-center gap-1 md:gap-2 min-w-0">
             {view === 'week' && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={handlePrevWeek}
                   aria-label="上一週"
-                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ‹
                 </button>
@@ -305,19 +305,19 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextWeek}
                   aria-label="下一週"
-                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
                 </button>
               </div>
             )}
             {view === 'month' && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
                   aria-label="上個月"
-                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ‹
                 </button>
@@ -325,20 +325,20 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextMonth}
                   aria-label="下個月"
-                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-1.5 md:px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
                 </button>
               </div>
             )}
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{headerLabel}</h1>
+            <h1 className="text-sm md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{headerLabel}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
             <button
               type="button"
               onClick={handleToday}
-              className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap"
             >
               今天
             </button>
@@ -349,7 +349,7 @@ export default function CalendarPage({
                   key={value}
                   type="button"
                   onClick={() => setView(value)}
-                  className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm rounded-md transition-colors ${
                     view === value
                       ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm font-medium'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
