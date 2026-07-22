@@ -189,7 +189,7 @@ export default function MonthView({
                                     e.stopPropagation()
                                     onTaskClick(task.id)
                                   }}
-                                  className={`w-full flex items-center gap-1 px-1.5 py-0.5 rounded text-left text-xs truncate transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
+                                  className={`w-full flex items-center gap-0.5 px-0.5 sm:px-1.5 py-0.5 rounded text-left text-[8px] sm:text-xs leading-tight truncate transition-colors hover:opacity-90 ${bgColor} ${textColor} ${
                                     isCompleted ? 'line-through opacity-70 cursor-not-allowed' : 'cursor-grab'
                                   } ${draggedTaskId === task.id ? 'opacity-50' : ''}`}
                                 >
@@ -203,7 +203,7 @@ export default function MonthView({
                               <button
                                 type="button"
                                 onClick={(e) => handleMoreClick(e, dateStr)}
-                                className="w-full text-left text-xs text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-1"
+                                className="w-full text-left text-[8px] sm:text-xs text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-0.5 sm:px-1"
                               >
                                 +{hiddenCount} 個更多
                               </button>
