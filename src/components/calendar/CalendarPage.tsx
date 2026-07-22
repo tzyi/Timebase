@@ -191,6 +191,22 @@ export default function CalendarPage({
     setFocusDate(newDate)
   }, [])
 
+  const handlePrevMonth = useCallback(() => {
+    setFocusDate((prev) => {
+      const newMonth = prev.getMonth() - 1
+      if (newMonth < 0) return new Date(prev.getFullYear() - 1, 11, 1)
+      return new Date(prev.getFullYear(), newMonth, 1)
+    })
+  }, [])
+
+  const handleNextMonth = useCallback(() => {
+    setFocusDate((prev) => {
+      const newMonth = prev.getMonth() + 1
+      if (newMonth > 11) return new Date(prev.getFullYear() + 1, 0, 1)
+      return new Date(prev.getFullYear(), newMonth, 1)
+    })
+  }, [])
+
   const handlePrevWeek = useCallback(() => {
     setFocusDate((prev) => addDays(getWeekDays(prev)[0], -7))
   }, [])
@@ -289,6 +305,26 @@ export default function CalendarPage({
                   type="button"
                   onClick={handleNextWeek}
                   aria-label="下一週"
+                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+            {view === 'month' && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  aria-label="上個月"
+                  className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  aria-label="下個月"
                   className="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   ›
