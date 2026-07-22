@@ -197,7 +197,7 @@ export default function TasksApp({
       : tasks.find((t) => t.id === selectedTaskId)
 
   return (
-    <div className="flex h-full bg-gray-100 relative">
+    <div className="flex h-full bg-gray-100 dark:bg-gray-950 relative">
       {/* 桌機側欄（可收合） */}
       {!isSidebarCollapsed && (
         <Sidebar
@@ -229,11 +229,11 @@ export default function TasksApp({
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-4 flex items-center gap-3">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700"
+            className="md:hidden p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             title="開啟清單側欄"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -244,7 +244,7 @@ export default function TasksApp({
           <button
             type="button"
             onClick={() => setIsSidebarCollapsed((v) => !v)}
-            className="hidden md:block p-2 -ml-2 text-gray-500 hover:text-gray-700"
+            className="hidden md:block p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             title={isSidebarCollapsed ? '展開側欄' : '收合側欄'}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -259,7 +259,7 @@ export default function TasksApp({
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               placeholder="新增任務到收集箱..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
@@ -271,12 +271,12 @@ export default function TasksApp({
           </form>
 
           {isListView && (
-            <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
               <button
                 type="button"
                 onClick={() => handleSwitchViewMode('list')}
                 className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                  viewMode === 'list' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                  viewMode === 'list' ? 'bg-white dark:bg-gray-900 shadow text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
                 清單
@@ -285,7 +285,7 @@ export default function TasksApp({
                 type="button"
                 onClick={() => handleSwitchViewMode('board')}
                 className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                  viewMode === 'board' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                  viewMode === 'board' ? 'bg-white dark:bg-gray-900 shadow text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
                 看板

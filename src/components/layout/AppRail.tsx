@@ -50,20 +50,20 @@ export default function AppRail({ userLabel }: AppRailProps) {
   const pathname = usePathname()
 
   return (
-    <div className="hidden md:flex w-16 bg-gray-50 border-r border-gray-200 flex-col items-center py-4 gap-2 flex-shrink-0">
+    <div className="hidden md:flex w-16 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col items-center py-4 gap-2 flex-shrink-0">
       <Link
         href="/account"
         title="帳號"
         className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors mb-2 ${
           pathname === '/account'
             ? 'bg-blue-500 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
         }`}
       >
         {userLabel}
       </Link>
 
-      <div className="w-8 border-t border-gray-200 mb-2" />
+      <div className="w-8 border-t border-gray-200 dark:border-gray-700 mb-2" />
 
       {NAV_ITEMS.map(({ href, label, icon }) => {
         const isActive = pathname?.startsWith(href)
@@ -73,7 +73,7 @@ export default function AppRail({ userLabel }: AppRailProps) {
             href={href}
             title={label}
             className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-              isActive ? 'bg-blue-500 text-white' : 'text-gray-500 hover:bg-gray-100'
+              isActive ? 'bg-blue-500 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

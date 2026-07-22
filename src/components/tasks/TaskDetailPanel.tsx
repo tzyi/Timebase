@@ -274,7 +274,7 @@ export default function TaskDetailPanel({
           <button
             onClick={onClose}
             title="返回"
-            className="md:hidden flex items-center gap-1 p-1.5 -ml-1.5 mr-1 rounded hover:bg-gray-100 text-gray-600"
+            className="md:hidden flex items-center gap-1 p-1.5 -ml-1.5 mr-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -286,7 +286,7 @@ export default function TaskDetailPanel({
           <button
             onClick={() => setShowDatePicker((v) => !v)}
             title="設定到期日"
-            className={`flex items-center gap-1 px-2 py-1.5 rounded hover:bg-gray-100 text-sm ${dueDate ? 'text-blue-600' : 'text-gray-500'}`}
+            className={`flex items-center gap-1 px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-sm ${dueDate ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -299,19 +299,19 @@ export default function TaskDetailPanel({
               : '到期日'}
           </button>
           {showDatePicker && (
-            <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg p-3 w-72">
+            <div className="absolute left-0 top-full mt-1 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded shadow-lg p-3 w-72">
               <input
                 ref={dateInputRef}
                 type="date"
                 value={dueDate}
                 onChange={(e) => handleDueDateChange(e.target.value)}
-                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1"
                 autoFocus
               />
 
               {dueDate && (
                 <>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mt-2">
                     <input
                       type="checkbox"
                       checked={allDay}
@@ -323,23 +323,23 @@ export default function TaskDetailPanel({
 
                   <div className="flex items-center gap-2 mt-2">
                     <div className="flex-1 min-w-0">
-                      <label className="block text-xs text-gray-500 mb-0.5">開始時間</label>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">開始時間</label>
                       <input
                         type="time"
                         value={dueTime}
                         onChange={(e) => handleDueTimeChange(e.target.value)}
                         disabled={allDay}
-                        className="w-full text-sm border border-gray-300 rounded px-1.5 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-1.5 py-1 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <label className="block text-xs text-gray-500 mb-0.5">結束時間</label>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">結束時間</label>
                       <input
                         type="time"
                         value={endTime}
                         onChange={(e) => handleEndTimeChange(e.target.value)}
                         disabled={allDay}
-                        className="w-full text-sm border border-gray-300 rounded px-1.5 py-1 disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full text-sm border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded px-1.5 py-1 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600"
                       />
                     </div>
                   </div>
@@ -349,7 +349,7 @@ export default function TaskDetailPanel({
                       handleDueDateChange('')
                       setShowDatePicker(false)
                     }}
-                    className="w-full mt-2 text-xs text-red-500 hover:text-red-600"
+                    className="w-full mt-2 text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300"
                   >
                     清除日期
                   </button>
@@ -365,19 +365,19 @@ export default function TaskDetailPanel({
           <button
             onClick={() => setShowPriorityPicker((v) => !v)}
             title={PRIORITY_LABELS[priority]}
-            className="p-1.5 rounded hover:bg-gray-100"
+            className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill={PRIORITY_COLORS[priority]} stroke={PRIORITY_COLORS[priority]} strokeWidth="2">
               <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={priority === 'none' ? 'none' : PRIORITY_COLORS[priority]} />
             </svg>
           </button>
           {showPriorityPicker && (
-            <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[130px]">
+            <div className="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded shadow-lg py-1 min-w-[130px]">
               {PRIORITY_ORDER.map((p) => (
                 <button
                   key={p}
                   onClick={() => handlePriorityChange(p)}
-                  className={`w-full flex items-center gap-2 text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${priority === p ? 'font-medium text-blue-600' : 'text-gray-700'}`}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${priority === p ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill={PRIORITY_COLORS[p]} stroke={PRIORITY_COLORS[p]} strokeWidth="2">
                     <path d="M5 3v18M5 4h13l-3 4 3 4H5" fill={p === 'none' ? 'none' : PRIORITY_COLORS[p]} />
@@ -392,7 +392,7 @@ export default function TaskDetailPanel({
         <button
           onClick={onClose}
           title="關閉"
-          className={`p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 ${isModal ? '' : 'hidden md:block'}`}
+          className={`p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 ${isModal ? '' : 'hidden md:block'}`}
         >
           ✕
         </button>
@@ -406,7 +406,7 @@ export default function TaskDetailPanel({
           onBlur={saveTitle}
           rows={1}
           placeholder="任務標題"
-          className="w-full resize-none text-xl font-semibold text-gray-900 border-none outline-none focus:ring-0 p-0 mb-2"
+          className="w-full resize-none text-xl font-semibold text-gray-900 dark:text-gray-100 border-none outline-none focus:ring-0 p-0 mb-2 bg-transparent"
         />
 
         {/* 備註 */}
@@ -416,7 +416,7 @@ export default function TaskDetailPanel({
           onBlur={saveNote}
           rows={2}
           placeholder="新增備註..."
-          className="w-full resize-none text-sm text-gray-500 border-none outline-none focus:ring-0 p-0 mb-4"
+          className="w-full resize-none text-sm text-gray-500 dark:text-gray-400 border-none outline-none focus:ring-0 p-0 mb-4 bg-transparent"
         />
 
         {/* 子任務 */}

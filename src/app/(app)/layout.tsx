@@ -17,7 +17,7 @@ export default async function AppLayout({
   const userLabel = (session.user?.name || session.user?.email || '?').charAt(0).toUpperCase()
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-gray-950">
       <AppRail userLabel={userLabel} />
       <div className="flex-1 min-w-0 h-screen overflow-hidden pb-14 md:pb-0">{children}</div>
       <BottomNav />

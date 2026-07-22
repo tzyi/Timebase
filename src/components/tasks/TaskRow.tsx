@@ -24,7 +24,7 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
   return (
     <div
       onClick={() => onSelectTask(task.id)}
-      className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+      className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
     >
       <input
         type="checkbox"
@@ -37,7 +37,7 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
       />
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm truncate ${isCompleted ? 'line-through text-gray-400' : 'text-gray-900'}`}
+          className={`text-sm truncate ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}
         >
           {task.title}
         </p>
@@ -46,25 +46,25 @@ export default function TaskRow({ task, onSelectTask, onToggleComplete }: TaskRo
             {task.tags.slice(0, 2).map(({ tag }) => (
               <span
                 key={tag.id}
-                className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600"
+                className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
               >
                 {tag.name}
               </span>
             ))}
-            {task.tags.length > 2 && <span className="text-xs text-gray-400">+{task.tags.length - 2}</span>}
+            {task.tags.length > 2 && <span className="text-xs text-gray-400 dark:text-gray-500">+{task.tags.length - 2}</span>}
           </div>
         )}
       </div>
 
       {task.list && (
-        <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700 whitespace-nowrap">
+        <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap">
           {task.list.name}
         </span>
       )}
 
       {task.dueDate && (
         <span
-          className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 font-medium' : 'text-blue-600'}`}
+          className={`text-xs whitespace-nowrap ${isTaskOverdue && !isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : 'text-blue-600 dark:text-blue-400'}`}
         >
           {formatDueDate(task.dueDate)}
           {!task.allDay && task.dueTime ? ` ${task.dueTime}` : ''}
