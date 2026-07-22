@@ -10,6 +10,7 @@
 - `id`：唯一識別碼
 - `userId`：擁有者使用者 ID
 - `listId`：選擇性的清單關聯
+- `groupId`：選擇性的分組（TaskGroup）關聯，null 代表未分組
 - `title`：任務名稱（必填）
 - `note`：選擇性說明
 - `dueDate`：選擇性截止日期（DateTime）
@@ -45,3 +46,11 @@
 - **WHEN** 現有任務有 dueDate，但沒有 dueTime/endTime/allDay
 - **THEN** 它們被視為無時間任務（僅顯示，沒有時間定位）
 - **AND** 現有任務的 allDay 預設為 false
+
+#### Scenario: New task defaults to no group
+- **WHEN** 建立新任務且未指定分組
+- **THEN** `groupId` 預設為 null（未分組）
+
+#### Scenario: Group deletion clears task group reference
+- **WHEN** 任務所屬的分組（TaskGroup）被刪除
+- **THEN** 該任務的 `groupId` 被設為 null，任務本身不受影響
