@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { Habit } from '@prisma/client'
 import { getHabits } from '@/actions/habits'
 import { toggleHabitLog } from '@/actions/habitLogs'
-import { dateToString, addDays, getToday } from '@/lib/calendarHelpers'
+import { dateToString, getToday, getWeekDays } from '@/lib/calendarHelpers'
 import { ensureOnline } from '@/lib/toast'
 import WeekStrip from './WeekStrip'
 import HabitList from './HabitList'
@@ -29,7 +29,7 @@ export default function HabitPage({ initialHabits, initialDateStr }: HabitPagePr
   const [isArchivedOpen, setIsArchivedOpen] = useState(false)
 
   const today = getToday()
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6))
+  const weekDays = getWeekDays(today)
   const focusDateStr = dateToString(focusDate)
 
   const refreshHabits = useCallback(async (dateStr: string) => {
