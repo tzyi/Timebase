@@ -54,7 +54,10 @@ export async function getHabits(dateStr: string) {
 
     const scheduled = habits
       .filter((h: (typeof habits)[number]) => isScheduledOn(h, dateStr))
-      .map(({ logs, ...habit }) => ({ ...habit, completedToday: logs.length > 0 }))
+      .map((h: (typeof habits)[number]) => {
+        const { logs, ...habit } = h
+        return { ...habit, completedToday: logs.length > 0 }
+      })
 
     return { success: true, data: scheduled }
   } catch (error) {
